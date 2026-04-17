@@ -1,0 +1,440 @@
+{% extends 'index.html' %}
+
+{% block content %}
+
+<style>
+    /* ── HERO ── */
+    .hero {
+        position: relative;
+        min-height: calc(100vh - 70px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 80px 40px;
+        overflow: hidden;
+    }
+
+    /* Glow blobs */
+    .hero::before {
+        content: '';
+        position: absolute;
+        top: -120px; left: 50%;
+        transform: translateX(-50%);
+        width: 700px; height: 700px;
+        background: radial-gradient(circle, rgba(79,140,255,0.12) 0%, transparent 65%);
+        pointer-events: none;
+    }
+
+    .hero::after {
+        content: '';
+        position: absolute;
+        bottom: -80px; right: 10%;
+        width: 400px; height: 400px;
+        background: radial-gradient(circle, rgba(162,89,255,0.1) 0%, transparent 65%);
+        pointer-events: none;
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 18px;
+        background: rgba(79,140,255,0.08);
+        border: 1px solid rgba(79,140,255,0.2);
+        border-radius: 99px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--accent);
+        letter-spacing: 0.04em;
+        margin-bottom: 30px;
+        animation: fadeIn 0.5s ease both;
+    }
+
+    .hero-badge-dot {
+        width: 7px; height: 7px;
+        border-radius: 50%;
+        background: var(--accent);
+        animation: pulse 1.8s ease infinite;
+    }
+
+    .hero h1 {
+        font-family: 'Syne', sans-serif;
+        font-size: clamp(2.8rem, 7vw, 5.5rem);
+        font-weight: 800;
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+        max-width: 820px;
+        margin-bottom: 24px;
+    }
+
+    .hero h1 span {
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hero p {
+        font-size: 1.15rem;
+        color: var(--muted);
+        max-width: 520px;
+        line-height: 1.7;
+        margin-bottom: 40px;
+        font-weight: 300;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-bottom: 80px;
+    }
+
+    .hero-actions .btn {
+        padding: 15px 34px;
+        font-size: 1rem;
+    }
+
+    /* ── STATS STRIP ── */
+    .stats-strip {
+        display: flex;
+        gap: 1px;
+        background: var(--border);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        max-width: 680px;
+        width: 100%;
+    }
+
+    .stat {
+        flex: 1;
+        background: var(--surface);
+        padding: 22px 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .stat-number {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.8rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--text), var(--muted));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        color: var(--muted);
+        font-weight: 500;
+        letter-spacing: 0.04em;
+    }
+
+    /* ── FEATURES ── */
+    .features {
+        padding: 100px 40px;
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    .section-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 12px;
+    }
+
+    .section-title {
+        font-family: 'Syne', sans-serif;
+        font-size: clamp(1.8rem, 4vw, 2.8rem);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin-bottom: 60px;
+        max-width: 440px;
+        line-height: 1.2;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+
+    .feature-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 32px;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(79,140,255,0.04), transparent);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .feature-card:hover {
+        border-color: rgba(79,140,255,0.35);
+        transform: translateY(-4px);
+        box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+    }
+
+    .feature-card:hover::before { opacity: 1; }
+
+    .feature-icon {
+        width: 46px; height: 46px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        margin-bottom: 20px;
+    }
+
+    .feature-icon.blue   { background: rgba(79,140,255,0.12); }
+    .feature-icon.purple { background: rgba(162,89,255,0.12); }
+    .feature-icon.gold   { background: rgba(245,200,66,0.12); }
+    .feature-icon.green  { background: rgba(61,220,172,0.12); }
+    .feature-icon.pink   { background: rgba(255,90,110,0.12); }
+    .feature-icon.teal   { background: rgba(61,220,172,0.12); }
+
+    .feature-card h3 {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        letter-spacing: -0.01em;
+    }
+
+    .feature-card p {
+        font-size: 0.875rem;
+        color: var(--muted);
+        line-height: 1.65;
+    }
+
+    /* ── CTA BAND ── */
+    .cta-band {
+        margin: 0 40px 100px;
+        background: linear-gradient(135deg, rgba(79,140,255,0.08), rgba(162,89,255,0.08));
+        border: 1px solid rgba(79,140,255,0.2);
+        border-radius: 20px;
+        padding: 60px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cta-band::before {
+        content: 'NEXUS';
+        position: absolute;
+        font-family: 'Syne', sans-serif;
+        font-size: 12rem;
+        font-weight: 800;
+        color: rgba(255,255,255,0.02);
+        letter-spacing: -0.04em;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+        pointer-events: none;
+        white-space: nowrap;
+    }
+
+    .cta-band h2 {
+        font-family: 'Syne', sans-serif;
+        font-size: 2.2rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin-bottom: 14px;
+    }
+
+    .cta-band p {
+        color: var(--muted);
+        margin-bottom: 30px;
+        font-size: 1rem;
+    }
+
+    /* ── MEMBERS MARQUEE ── */
+    .marquee-section {
+        padding: 60px 0;
+        overflow: hidden;
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 80px;
+    }
+
+    .marquee-label {
+        text-align: center;
+        font-size: 0.75rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 28px;
+    }
+
+    .marquee-track {
+        display: flex;
+        gap: 16px;
+        animation: marquee 22s linear infinite;
+        width: max-content;
+    }
+
+    @keyframes marquee {
+        from { transform: translateX(0); }
+        to   { transform: translateX(-50%); }
+    }
+
+    .member-pill {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 20px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 99px;
+        white-space: nowrap;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .member-avatar {
+        width: 28px; height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+</style>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-badge anim-1">
+        <span class="hero-badge-dot"></span>
+        New members joining every day
+    </div>
+
+    <h1 class="anim-2">
+        Connect with your<br><span>community</span>
+    </h1>
+
+    <p class="anim-3">
+        Nexus is where curious people gather to share ideas, collaborate on projects, and build meaningful connections.
+    </p>
+
+    <div class="hero-actions anim-4">
+        <a href="/register/" class="btn btn-primary">Start for free →</a>
+        <a href="/login/" class="btn btn-ghost">Sign in</a>
+    </div>
+
+    <div class="stats-strip anim-5">
+        <div class="stat">
+            <span class="stat-number">12K+</span>
+            <span class="stat-label">Members</span>
+        </div>
+        <div class="stat">
+            <span class="stat-number">840</span>
+            <span class="stat-label">Posts today</span>
+        </div>
+        <div class="stat">
+            <span class="stat-number">98%</span>
+            <span class="stat-label">Satisfaction</span>
+        </div>
+        <div class="stat">
+            <span class="stat-number">47</span>
+            <span class="stat-label">Topics</span>
+        </div>
+    </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-section">
+    <p class="marquee-label">Members from around the world</p>
+    <div class="marquee-track">
+        <div class="member-pill"><div class="member-avatar" style="background:rgba(79,140,255,0.2);color:var(--accent);">A</div> Alex Chen</div>
+        <div class="member-pill"><div class="member-avatar" style="background:rgba(162,89,255,0.2);color:var(--accent2);">S</div> Sara Müller</div>
+        <div class="member-pill"><div class="member-avatar" style="background:rgba(245,200,66,0.2);color:var(--gold);">J</div> James K.</div>
+        <div class="member-pill"><div class="member-avatar" style="background:rgba(61,220,172,0.2);color:var(--success);">P</div> Priya Nair</div>
+        <div class="member-pill"><div class="member-avatar" style="background:rgba(255,90,110,0.2);color:var(--danger);">L</div> Luca Romano</div>
+        <div class="member-pill"><div class="member-avatar" style="background:rgba(79,140,255,0.2);color:var(--accent);">M</div> Maya Osei</div>
+        <div class="member-pill"><div class="member-avatar" style="background:rgba(162,89,255,0.2);color:var(--accent2);">R</div> Raj Patel</div>
+        <div class="member-pill"><div class="member-avatar" style="background:rgba(245,200,66,0.2);color:var(--gold);">E</div> Emma Liu</div>
+        <div class="member-pill"><div class="member-avatar" style="background:rgba(61,220,172,0.2);color:var(--success);">K</div> Kenji Tanaka</div>
+        <div class="member-pill"><div class="member-avatar" style="background:rgba(255,90,110,0.2);color:var(--danger);">F</div> Fatima Al-Z</div>
+        <!-- duplicate for seamless loop -->
+        <div class="member-pill"><div class="member-avatar" style="background:rgba(79,140,255,0.2);color:var(--accent);">A</div> Alex Chen</div>
+        <div class="member-pill"><div class="member-avatar" style="background:rgba(162,89,255,0.2);color:var(--accent2);">S</div> Sara Müller</div>
+        <div class="member-pill"><div class="member-avatar" style="background:rgba(245,200,66,0.2);color:var(--gold);">J</div> James K.</div>
+        <div class="member-pill"><div class="member-avatar" style="background:rgba(61,220,172,0.2);color:var(--success);">P</div> Priya Nair</div>
+        <div class="member-pill"><div class="member-avatar" style="background:rgba(255,90,110,0.2);color:var(--danger);">L</div> Luca Romano</div>
+        <div class="member-pill"><div class="member-avatar" style="background:rgba(79,140,255,0.2);color:var(--accent);">M</div> Maya Osei</div>
+        <div class="member-pill"><div class="member-avatar" style="background:rgba(162,89,255,0.2);color:var(--accent2);">R</div> Raj Patel</div>
+        <div class="member-pill"><div class="member-avatar" style="background:rgba(245,200,66,0.2);color:var(--gold);">E</div> Emma Liu</div>
+        <div class="member-pill"><div class="member-avatar" style="background:rgba(61,220,172,0.2);color:var(--success);">K</div> Kenji Tanaka</div>
+        <div class="member-pill"><div class="member-avatar" style="background:rgba(255,90,110,0.2);color:var(--danger);">F</div> Fatima Al-Z</div>
+    </div>
+</div>
+
+<!-- FEATURES -->
+<section class="features">
+    <div class="section-label">Why Nexus</div>
+    <h2 class="section-title">Everything your community needs</h2>
+
+    <div class="features-grid">
+        <div class="feature-card anim-1">
+            <div class="feature-icon blue">💬</div>
+            <h3>Rich Discussions</h3>
+            <p>Threaded conversations with rich formatting, reactions, and media support.</p>
+        </div>
+        <div class="feature-card anim-2">
+            <div class="feature-icon purple">🔒</div>
+            <h3>Secure & Private</h3>
+            <p>Your data stays yours. End-to-end security with granular privacy controls.</p>
+        </div>
+        <div class="feature-card anim-3">
+            <div class="feature-icon gold">⚡</div>
+            <h3>Real-time Updates</h3>
+            <p>Live notifications so you're always in the loop without refreshing.</p>
+        </div>
+        <div class="feature-card anim-4">
+            <div class="feature-icon green">🌐</div>
+            <h3>Global Network</h3>
+            <p>Connect with members from 80+ countries who share your interests.</p>
+        </div>
+        <div class="feature-card anim-5">
+            <div class="feature-icon pink">🎯</div>
+            <h3>Smart Discovery</h3>
+            <p>Find the right people and content through our intelligent recommendation engine.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon teal">📊</div>
+            <h3>Member Analytics</h3>
+            <p>Track your engagement, reach, and impact across the community.</p>
+        </div>
+    </div>
+</section>
+
+<!-- CTA BAND -->
+<div class="cta-band">
+    <h2>Ready to join the conversation?</h2>
+    <p>Free forever. No credit card required.</p>
+    <a href="/register/" class="btn btn-primary" style="display:inline-flex;width:auto;">Create your account →</a>
+</div>
+
+{% endblock %}

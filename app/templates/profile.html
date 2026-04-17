@@ -1,0 +1,550 @@
+{% extends 'index.html' %}
+
+{% block content %}
+
+<style>
+    .profile-page {
+        max-width: 1060px;
+        margin: 0 auto;
+        padding: 60px 40px 100px;
+    }
+
+    /* ── COVER + HEADER ── */
+    .profile-cover {
+        height: 200px;
+        border-radius: 20px 20px 0 0;
+        background: linear-gradient(135deg, #1a1f35 0%, #0f1726 40%, #1a1035 100%);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        border-bottom: none;
+    }
+
+    .profile-cover::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(ellipse at 20% 50%, rgba(79,140,255,0.2) 0%, transparent 55%),
+            radial-gradient(ellipse at 80% 20%, rgba(162,89,255,0.15) 0%, transparent 50%),
+            radial-gradient(ellipse at 60% 80%, rgba(61,220,172,0.08) 0%, transparent 45%);
+    }
+
+    /* grid lines decoration */
+    .profile-cover::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+    }
+
+    .profile-header {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-top: none;
+        border-radius: 0 0 20px 20px;
+        padding: 0 36px 32px;
+        margin-bottom: 30px;
+        position: relative;
+    }
+
+    .profile-avatar-wrap {
+        position: relative;
+        display: inline-block;
+        margin-top: -52px;
+        margin-bottom: 16px;
+    }
+
+    .profile-avatar {
+        width: 104px; height: 104px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        border: 4px solid var(--surface);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Syne', sans-serif;
+        font-size: 2.4rem;
+        font-weight: 800;
+        color: white;
+    }
+
+    .online-ring {
+        position: absolute;
+        bottom: 6px; right: 6px;
+        width: 18px; height: 18px;
+        border-radius: 50%;
+        background: var(--success);
+        border: 3px solid var(--surface);
+        animation: pulse 2s ease infinite;
+    }
+
+    .profile-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .profile-name {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.7rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin-bottom: 4px;
+    }
+
+    .profile-handle {
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+
+    .profile-badges {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .profile-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    /* ── STATS ROW ── */
+    .profile-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1px;
+        background: var(--border);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    .pstat {
+        background: var(--surface);
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        transition: background 0.2s;
+    }
+
+    .pstat:hover { background: var(--surface2); }
+
+    .pstat-number {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.7rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .pstat-label {
+        font-size: 0.78rem;
+        color: var(--muted);
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    /* ── GRID LAYOUT ── */
+    .profile-grid {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 24px;
+    }
+
+    .profile-main { display: flex; flex-direction: column; gap: 24px; }
+    .profile-aside { display: flex; flex-direction: column; gap: 24px; }
+
+    /* ── INFO CARD ── */
+    .info-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 28px;
+    }
+
+    .info-card-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .info-card-title a {
+        font-size: 0.78rem;
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 500;
+        font-family: 'DM Sans', sans-serif;
+    }
+
+    .info-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .info-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .info-row:first-child { padding-top: 0; }
+
+    .info-icon {
+        width: 34px; height: 34px;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+        background: var(--surface2);
+    }
+
+    .info-key {
+        font-size: 0.75rem;
+        color: var(--muted);
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+    }
+
+    .info-val {
+        font-size: 0.9rem;
+        color: var(--text);
+    }
+
+    /* ── ACTIVITY ── */
+    .activity-item-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .activity-item-row:last-child { border-bottom: none; }
+
+    .act-icon {
+        width: 36px; height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+        flex-shrink: 0;
+    }
+
+    .act-text { font-size: 0.875rem; line-height: 1.5; }
+    .act-text strong { font-weight: 600; }
+    .act-text span   { color: var(--muted); }
+    .act-time { font-size: 0.72rem; color: var(--muted); margin-top: 3px; }
+
+    /* ── PROGRESS / SKILLS ── */
+    .skill-row {
+        margin-bottom: 14px;
+    }
+
+    .skill-header {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.82rem;
+        margin-bottom: 7px;
+    }
+
+    .skill-label { font-weight: 500; }
+    .skill-pct   { color: var(--muted); }
+
+    .skill-bar {
+        height: 6px;
+        background: var(--surface2);
+        border-radius: 99px;
+        overflow: hidden;
+    }
+
+    .skill-fill {
+        height: 100%;
+        border-radius: 99px;
+        background: linear-gradient(90deg, var(--accent), var(--accent2));
+        animation: barGrow 1.2s ease both;
+    }
+
+    @keyframes barGrow {
+        from { width: 0 !important; }
+    }
+
+    /* ── LEVEL CARD ── */
+    .level-card {
+        background: linear-gradient(135deg, rgba(79,140,255,0.1), rgba(162,89,255,0.08));
+        border: 1px solid rgba(79,140,255,0.2);
+        border-radius: var(--radius);
+        padding: 24px;
+        text-align: center;
+    }
+
+    .level-ring {
+        width: 80px; height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 14px;
+        font-family: 'Syne', sans-serif;
+        font-size: 1.8rem;
+        font-weight: 800;
+        box-shadow: 0 0 30px rgba(79,140,255,0.3);
+    }
+
+    .level-label {
+        font-size: 0.75rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 4px;
+    }
+
+    .level-name {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 14px;
+    }
+
+    .level-xp {
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-bottom: 10px;
+    }
+
+    .xp-bar {
+        height: 6px;
+        background: var(--surface2);
+        border-radius: 99px;
+        overflow: hidden;
+    }
+
+    .xp-fill {
+        height: 100%;
+        width: 68%;
+        border-radius: 99px;
+        background: linear-gradient(90deg, var(--accent), var(--accent2));
+        animation: barGrow 1.4s ease both;
+    }
+</style>
+
+<div class="profile-page">
+
+    <!-- COVER -->
+    <div class="profile-cover anim-1"></div>
+
+    <!-- HEADER -->
+    <div class="profile-header anim-2">
+        <div class="profile-avatar-wrap">
+            <div class="profile-avatar">{{ username|first|upper }}</div>
+            <div class="online-ring"></div>
+        </div>
+
+        <div class="profile-meta">
+            <div>
+                <div class="profile-name">{{ username }}</div>
+                <div class="profile-handle">@{{ username|lower }} · Member since 2024</div>
+                <div class="profile-badges">
+                    <span class="badge badge-gold">⭐ Top Contributor</span>
+                    <span class="badge badge-blue">💬 Active</span>
+                    <span class="badge badge-green">✓ Verified</span>
+                </div>
+            </div>
+            <div class="profile-actions">
+                <button class="btn btn-ghost" style="padding:9px 18px;font-size:0.85rem;">✏️ Edit Profile</button>
+                <button class="btn btn-ghost" style="padding:9px 18px;font-size:0.85rem;">⚙ Settings</button>
+                <a href="/logout/">
+                    <button class="btn btn-danger" style="padding:9px 18px;font-size:0.85rem;">← Sign out</button>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- STATS ROW -->
+    <div class="profile-stats anim-3">
+        <div class="pstat">
+            <span class="pstat-number" style="background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">247</span>
+            <span class="pstat-label">Posts</span>
+        </div>
+        <div class="pstat">
+            <span class="pstat-number" style="background:linear-gradient(135deg,var(--accent2),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">1.2K</span>
+            <span class="pstat-label">Followers</span>
+        </div>
+        <div class="pstat">
+            <span class="pstat-number" style="background:linear-gradient(135deg,var(--gold),var(--success));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">384</span>
+            <span class="pstat-label">Following</span>
+        </div>
+        <div class="pstat">
+            <span class="pstat-number" style="background:linear-gradient(135deg,var(--success),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">4.8K</span>
+            <span class="pstat-label">Karma</span>
+        </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="profile-grid anim-4">
+
+        <!-- MAIN COLUMN -->
+        <div class="profile-main">
+
+            <!-- ACCOUNT INFO -->
+            <div class="info-card">
+                <div class="info-card-title">
+                    Account Information
+                    <a href="#">Edit →</a>
+                </div>
+
+                <div class="info-row">
+                    <div class="info-icon">👤</div>
+                    <div>
+                        <div class="info-key">Username</div>
+                        <div class="info-val">{{ username }}</div>
+                    </div>
+                </div>
+
+                <div class="info-row">
+                    <div class="info-icon">📧</div>
+                    <div>
+                        <div class="info-key">Email</div>
+                        <div class="info-val">{{ email }}</div>
+                    </div>
+                </div>
+
+                <div class="info-row">
+                    <div class="info-icon">📝</div>
+                    <div>
+                        <div class="info-key">Bio</div>
+                        <div class="info-val" style="color:{% if bio %}var(--text){% else %}var(--muted){% endif %}">
+                            {% if bio %}{{ bio }}{% else %}No bio yet — tell the community about yourself!{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-row">
+                    <div class="info-icon">📍</div>
+                    <div>
+                        <div class="info-key">Location</div>
+                        <div class="info-val" style="color:var(--muted)">Not set</div>
+                    </div>
+                </div>
+
+                <div class="info-row">
+                    <div class="info-icon">🌐</div>
+                    <div>
+                        <div class="info-key">Website</div>
+                        <div class="info-val" style="color:var(--muted)">Not set</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RECENT ACTIVITY -->
+            <div class="info-card">
+                <div class="info-card-title">
+                    Recent Activity
+                    <a href="#">View all →</a>
+                </div>
+
+                <div class="activity-item-row">
+                    <div class="act-icon" style="background:rgba(79,140,255,0.12);">💬</div>
+                    <div>
+                        <div class="act-text"><strong>Posted</strong> <span>in #design — "The future of UI components"</span></div>
+                        <div class="act-time">2 hours ago</div>
+                    </div>
+                </div>
+
+                <div class="activity-item-row">
+                    <div class="act-icon" style="background:rgba(61,220,172,0.12);">👍</div>
+                    <div>
+                        <div class="act-text"><strong>Upvoted</strong> <span>a post by Alex Chen in #startups</span></div>
+                        <div class="act-time">5 hours ago</div>
+                    </div>
+                </div>
+
+                <div class="activity-item-row">
+                    <div class="act-icon" style="background:rgba(162,89,255,0.12);">🔖</div>
+                    <div>
+                        <div class="act-text"><strong>Bookmarked</strong> <span>"10 productivity hacks for remote teams"</span></div>
+                        <div class="act-time">Yesterday</div>
+                    </div>
+                </div>
+
+                <div class="activity-item-row">
+                    <div class="act-icon" style="background:rgba(245,200,66,0.12);">⭐</div>
+                    <div>
+                        <div class="act-text"><strong>Earned badge</strong> <span>Top Contributor of the week</span></div>
+                        <div class="act-time">3 days ago</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ASIDE COLUMN -->
+        <div class="profile-aside">
+
+            <!-- LEVEL -->
+            <div class="level-card anim-1">
+                <div class="level-ring">7</div>
+                <div class="level-label">Community Level</div>
+                <div class="level-name">Thought Leader</div>
+                <div class="level-xp">4,800 / 7,000 XP to Level 8</div>
+                <div class="xp-bar"><div class="xp-fill"></div></div>
+            </div>
+
+            <!-- INTERESTS / SKILLS -->
+            <div class="info-card">
+                <div class="info-card-title">Engagement by Topic</div>
+
+                <div class="skill-row">
+                    <div class="skill-header"><span class="skill-label">Design</span><span class="skill-pct">82%</span></div>
+                    <div class="skill-bar"><div class="skill-fill" style="width:82%"></div></div>
+                </div>
+                <div class="skill-row">
+                    <div class="skill-header"><span class="skill-label">Technology</span><span class="skill-pct">67%</span></div>
+                    <div class="skill-bar"><div class="skill-fill" style="width:67%"></div></div>
+                </div>
+                <div class="skill-row">
+                    <div class="skill-header"><span class="skill-label">Startups</span><span class="skill-pct">54%</span></div>
+                    <div class="skill-bar"><div class="skill-fill" style="width:54%"></div></div>
+                </div>
+                <div class="skill-row">
+                    <div class="skill-header"><span class="skill-label">Career</span><span class="skill-pct">41%</span></div>
+                    <div class="skill-bar"><div class="skill-fill" style="width:41%"></div></div>
+                </div>
+            </div>
+
+            <!-- QUICK LINKS -->
+            <div class="info-card">
+                <div class="info-card-title">Quick Actions</div>
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                    <button class="btn btn-ghost" style="justify-content:flex-start;font-size:0.85rem;gap:12px;padding:11px 16px;">📝 New post</button>
+                    <button class="btn btn-ghost" style="justify-content:flex-start;font-size:0.85rem;gap:12px;padding:11px 16px;">💬 Browse discussions</button>
+                    <button class="btn btn-ghost" style="justify-content:flex-start;font-size:0.85rem;gap:12px;padding:11px 16px;">🔔 Notifications</button>
+                    <button class="btn btn-ghost" style="justify-content:flex-start;font-size:0.85rem;gap:12px;padding:11px 16px;">⚙ Account settings</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

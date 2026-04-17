@@ -1,0 +1,274 @@
+{% extends 'index.html' %}
+
+{% block content %}
+
+<style>
+    .auth-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        min-height: calc(100vh - 70px);
+    }
+
+    /* ── FORM SIDE (left on login) ── */
+    .auth-form-side {
+        padding: 80px 70px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: var(--bg);
+        border-right: 1px solid var(--border);
+    }
+
+    .auth-heading {
+        font-family: 'Syne', sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin-bottom: 8px;
+    }
+
+    .auth-sub {
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin-bottom: 36px;
+    }
+
+    .auth-sub a {
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .auth-sub a:hover { text-decoration: underline; }
+
+    .forgot-link {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 6px;
+    }
+
+    .forgot-link a {
+        font-size: 0.78rem;
+        color: var(--muted);
+        text-decoration: none;
+    }
+
+    .forgot-link a:hover { color: var(--accent); }
+
+    /* ── RIGHT PANEL ── */
+    .auth-panel {
+        background: linear-gradient(145deg, #0d1321 0%, #111827 100%);
+        padding: 80px 60px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auth-panel::before {
+        content: '';
+        position: absolute;
+        top: -100px; right: -100px;
+        width: 500px; height: 500px;
+        background: radial-gradient(circle, rgba(162,89,255,0.1) 0%, transparent 60%);
+        pointer-events: none;
+    }
+
+    .auth-panel::after {
+        content: '';
+        position: absolute;
+        bottom: -60px; left: -60px;
+        width: 350px; height: 350px;
+        background: radial-gradient(circle, rgba(79,140,255,0.08) 0%, transparent 60%);
+        pointer-events: none;
+    }
+
+    .panel-headline {
+        font-family: 'Syne', sans-serif;
+        font-size: 2.4rem;
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: -0.03em;
+        margin-bottom: 20px;
+    }
+
+    .panel-headline span {
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .panel-sub {
+        color: var(--muted);
+        font-size: 0.95rem;
+        line-height: 1.7;
+        max-width: 320px;
+        margin-bottom: 50px;
+    }
+
+    /* Activity feed preview */
+    .activity-feed {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+        max-width: 360px;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 14px 16px;
+        transition: transform 0.2s;
+    }
+
+    .activity-item:hover { transform: translateX(4px); }
+
+    .a-avatar {
+        width: 34px; height: 34px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    .a-content { flex: 1; }
+
+    .a-text {
+        font-size: 0.83rem;
+        line-height: 1.5;
+        margin-bottom: 4px;
+    }
+
+    .a-text strong { color: var(--text); font-weight: 600; }
+    .a-text span   { color: var(--muted); }
+
+    .a-time {
+        font-size: 0.72rem;
+        color: var(--muted);
+    }
+
+    .live-dot {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.75rem;
+        color: var(--success);
+        font-weight: 600;
+        margin-bottom: 16px;
+        letter-spacing: 0.04em;
+    }
+
+    .live-dot::before {
+        content: '';
+        width: 7px; height: 7px;
+        border-radius: 50%;
+        background: var(--success);
+        animation: pulse 1.5s ease infinite;
+    }
+</style>
+
+<div class="auth-layout">
+
+    <!-- FORM SIDE -->
+    <div class="auth-form-side">
+        <div style="margin-bottom:40px;" class="anim-1">
+            <div style="display:flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;margin-bottom:0;">
+                <span style="width:9px;height:9px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 0 10px var(--accent);display:block;"></span>
+                Nexus
+            </div>
+        </div>
+
+        <h2 class="auth-heading anim-2">Welcome back</h2>
+        <p class="auth-sub anim-2">Don't have an account? <a href="/register/">Sign up free →</a></p>
+
+        <form method="POST" class="anim-3">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" name="username" placeholder="your_handle" autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="••••••••" autocomplete="current-password">
+                <div class="forgot-link"><a href="#">Forgot password?</a></div>
+            </div>
+
+            {% if error %}
+            <div class="alert alert-error anim-1">
+                <span>⚠</span> {{ error }}
+            </div>
+            {% endif %}
+
+            <button type="submit" class="btn btn-primary" style="margin-top:8px;">
+                Sign in →
+            </button>
+        </form>
+
+        <div class="divider anim-4">or continue with</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" class="anim-4">
+            <button class="btn btn-ghost" style="font-size:0.85rem;">
+                <span>🔑</span> Google
+            </button>
+            <button class="btn btn-ghost" style="font-size:0.85rem;">
+                <span>🐙</span> GitHub
+            </button>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="auth-panel anim-1">
+        <h2 class="panel-headline">Your community<br>is <span>waiting</span> for<br>you.</h2>
+        <p class="panel-sub">Hundreds of discussions are happening right now. Sign in to join the conversation.</p>
+
+        <div class="live-dot">LIVE ACTIVITY</div>
+
+        <div class="activity-feed">
+            <div class="activity-item">
+                <div class="a-avatar" style="background:rgba(79,140,255,0.2);color:var(--accent);">A</div>
+                <div class="a-content">
+                    <div class="a-text"><strong>Alex C.</strong> <span>started a new thread in</span> #design</div>
+                    <div class="a-time">2 minutes ago</div>
+                </div>
+            </div>
+            <div class="activity-item">
+                <div class="a-avatar" style="background:rgba(162,89,255,0.2);color:var(--accent2);">P</div>
+                <div class="a-content">
+                    <div class="a-text"><strong>Priya N.</strong> <span>replied to your post on</span> #startups</div>
+                    <div class="a-time">8 minutes ago</div>
+                </div>
+            </div>
+            <div class="activity-item">
+                <div class="a-avatar" style="background:rgba(245,200,66,0.2);color:var(--gold);">J</div>
+                <div class="a-content">
+                    <div class="a-text"><strong>James K.</strong> <span>liked your comment in</span> #tech</div>
+                    <div class="a-time">15 minutes ago</div>
+                </div>
+            </div>
+            <div class="activity-item">
+                <div class="a-avatar" style="background:rgba(61,220,172,0.2);color:var(--success);">M</div>
+                <div class="a-content">
+                    <div class="a-text"><strong>Maya O.</strong> <span>sent you a direct message</span></div>
+                    <div class="a-time">32 minutes ago</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

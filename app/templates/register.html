@@ -1,0 +1,315 @@
+{% extends 'index.html' %}
+
+{% block content %}
+
+<style>
+    .auth-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        min-height: calc(100vh - 70px);
+    }
+
+    /* ── LEFT PANEL ── */
+    .auth-panel {
+        background: linear-gradient(145deg, #0d1321 0%, #111827 100%);
+        border-right: 1px solid var(--border);
+        padding: 80px 60px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auth-panel::before {
+        content: '';
+        position: absolute;
+        top: -100px; left: -100px;
+        width: 500px; height: 500px;
+        background: radial-gradient(circle, rgba(79,140,255,0.1) 0%, transparent 60%);
+        pointer-events: none;
+    }
+
+    .auth-panel::after {
+        content: '';
+        position: absolute;
+        bottom: -60px; right: -60px;
+        width: 350px; height: 350px;
+        background: radial-gradient(circle, rgba(162,89,255,0.08) 0%, transparent 60%);
+        pointer-events: none;
+    }
+
+    /* .panel-top {} */
+
+    .panel-brand {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin-bottom: 60px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .panel-brand-dot {
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        box-shadow: 0 0 12px var(--accent);
+    }
+
+    .panel-headline {
+        font-family: 'Syne', sans-serif;
+        font-size: 2.6rem;
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: -0.03em;
+        margin-bottom: 20px;
+    }
+
+    .panel-headline span {
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .panel-sub {
+        color: var(--muted);
+        font-size: 1rem;
+        line-height: 1.7;
+        max-width: 340px;
+    }
+
+    .panel-perks {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        margin-top: 50px;
+    }
+
+    .perk {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-size: 0.9rem;
+        color: var(--muted);
+    }
+
+    .perk-icon {
+        width: 34px; height: 34px;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .testimonial-block {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 24px;
+        position: relative;
+    }
+
+    .testimonial-block::before {
+        content: '"';
+        position: absolute;
+        top: -14px; left: 20px;
+        font-family: 'Syne', sans-serif;
+        font-size: 3rem;
+        color: var(--accent);
+        line-height: 1;
+    }
+
+    .testimonial-text {
+        font-size: 0.9rem;
+        color: var(--muted);
+        line-height: 1.65;
+        margin-bottom: 16px;
+        font-style: italic;
+    }
+
+    .testimonial-author {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .t-avatar {
+        width: 32px; height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .t-name {
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .t-role {
+        font-size: 0.75rem;
+        color: var(--muted);
+    }
+
+    /* ── RIGHT (FORM) ── */
+    .auth-form-side {
+        padding: 80px 70px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: var(--bg);
+    }
+
+    .auth-heading {
+        font-family: 'Syne', sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin-bottom: 8px;
+    }
+
+    .auth-sub {
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin-bottom: 36px;
+    }
+
+    .auth-sub a {
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .auth-sub a:hover { text-decoration: underline; }
+
+    .name-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+
+    .terms-note {
+        font-size: 0.78rem;
+        color: var(--muted);
+        text-align: center;
+        margin-top: 16px;
+    }
+
+    .terms-note a {
+        color: var(--accent);
+        text-decoration: none;
+    }
+
+    .step-indicator {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 36px;
+    }
+
+    .step {
+        height: 3px;
+        border-radius: 99px;
+        flex: 1;
+        background: var(--border);
+        transition: background 0.3s;
+    }
+
+    .step.active { background: var(--accent); }
+</style>
+
+<div class="auth-layout">
+
+    <!-- LEFT PANEL -->
+    <div class="auth-panel anim-1">
+        <div class="panel-top">
+            <div class="panel-brand">
+                <span class="panel-brand-dot"></span>
+                Nexus
+            </div>
+
+            <h2 class="panel-headline">Join a community<br>that <span>grows</span><br>with you.</h2>
+            <p class="panel-sub">12,000+ members sharing ideas, building projects, and making lasting connections.</p>
+
+            <div class="panel-perks">
+                <div class="perk">
+                    <div class="perk-icon" style="background:rgba(79,140,255,0.12);">✓</div>
+                    <span>Free account with full access to all discussions</span>
+                </div>
+                <div class="perk">
+                    <div class="perk-icon" style="background:rgba(162,89,255,0.12);">✓</div>
+                    <span>Personalized feed based on your interests</span>
+                </div>
+                <div class="perk">
+                    <div class="perk-icon" style="background:rgba(61,220,172,0.12);">✓</div>
+                    <span>Direct messaging with any community member</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="testimonial-block">
+            <p class="testimonial-text">Nexus completely changed how I collaborate with others. Found my co-founder here within two weeks of joining.</p>
+            <div class="testimonial-author">
+                <div class="t-avatar">S</div>
+                <div>
+                    <div class="t-name">Sara Müller</div>
+                    <div class="t-role">Startup founder · Berlin</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FORM SIDE -->
+    <div class="auth-form-side">
+        <div class="step-indicator anim-1">
+            <div class="step active"></div>
+            <div class="step"></div>
+            <div class="step"></div>
+        </div>
+
+        <h2 class="auth-heading anim-2">Create your account</h2>
+        <p class="auth-sub anim-2">Already a member? <a href="/login/">Sign in →</a></p>
+
+        <form method="POST" class="anim-3">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" name="username" placeholder="your_handle" autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label>Email address</label>
+                <input type="email" name="email" placeholder="you@example.com" autocomplete="email">
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="Min. 8 characters" autocomplete="new-password">
+            </div>
+
+            {% if error %}
+            <div class="alert alert-error anim-1">
+                <span>⚠</span> {{ error }}
+            </div>
+            {% endif %}
+
+            <button type="submit" class="btn btn-primary" style="margin-top:8px;">
+                Create account →
+            </button>
+
+            <p class="terms-note">By registering you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</p>
+        </form>
+    </div>
+
+</div>
+
+{% endblock %}
