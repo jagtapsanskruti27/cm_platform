@@ -228,6 +228,10 @@
         color: var(--text);
     }
 
+    .info-val.muted {
+        color: var(--muted);
+    }
+
     /* ── ACTIVITY ── */
     .activity-item-row {
         display: flex;
@@ -432,7 +436,7 @@
                     <div class="info-icon">📝</div>
                     <div>
                         <div class="info-key">Bio</div>
-                        <div class="info-val" style="color:{% if bio %}var(--text){% else %}var(--muted){% endif %}">
+                        <div class="info-val{% if not bio %} muted{% endif %}">
                             {% if bio %}{{ bio }}{% else %}No bio yet — tell the community about yourself!{% endif %}
                         </div>
                     </div>

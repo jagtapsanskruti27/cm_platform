@@ -1,0 +1,263 @@
+{% extends 'index.html' %}
+
+{% block content %}
+
+<style>
+    .create-post-page {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 60px 20px 100px;
+    }
+
+    .create-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 32px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    .create-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 24px;
+        text-align: center;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .form-group {
+        margin-bottom: 24px;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 8px;
+        letter-spacing: 0.02em;
+    }
+
+    .form-textarea {
+        width: 100%;
+        min-height: 120px;
+        padding: 16px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        color: var(--text);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.95rem;
+        resize: vertical;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(79,140,255,0.1);
+    }
+
+    .form-textarea::placeholder {
+        color: var(--muted);
+    }
+
+    .file-upload-area {
+        border: 2px dashed var(--border);
+        border-radius: var(--radius);
+        padding: 40px;
+        text-align: center;
+        background: var(--surface2);
+        transition: border-color 0.2s, background 0.2s;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .file-upload-area:hover,
+    .file-upload-area.dragover {
+        border-color: var(--accent);
+        background: rgba(79,140,255,0.05);
+    }
+
+    .file-upload-icon {
+        font-size: 3rem;
+        color: var(--muted);
+        margin-bottom: 12px;
+    }
+
+    .file-upload-text {
+        font-size: 0.95rem;
+        color: var(--muted);
+        margin-bottom: 4px;
+    }
+
+    .file-upload-subtext {
+        font-size: 0.8rem;
+        color: var(--muted);
+    }
+
+    .file-input {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .image-preview {
+        margin-top: 16px;
+        display: none;
+    }
+
+    .image-preview img {
+        max-width: 100%;
+        border-radius: var(--radius);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        border: none;
+        border-radius: var(--radius);
+        color: white;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(79,140,255,0.3);
+    }
+
+    .btn-submit:active {
+        transform: translateY(0);
+    }
+
+    .char-count {
+        font-size: 0.8rem;
+        color: var(--muted);
+        text-align: right;
+        margin-top: 4px;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .create-card {
+        animation: fadeIn 0.6s ease both;
+    }
+</style>
+
+<div class="create-post-page">
+    <div class="create-card">
+        <h1 class="create-title">Create New Post</h1>
+
+        <form method="POST" enctype="multipart/form-data" id="postForm">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label class="form-label" for="caption">What's on your mind?</label>
+                <textarea
+                    name="caption"
+                    id="caption"
+                    class="form-textarea"
+                    placeholder="Share your thoughts, ideas, or updates..."
+                    maxlength="500"
+                ></textarea>
+                <div class="char-count"><span id="charCount">0</span>/500</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Add an image (optional)</label>
+                <div class="file-upload-area" id="uploadArea">
+                    <div class="file-upload-icon">📷</div>
+                    <div class="file-upload-text">Click to upload or drag and drop</div>
+                    <div class="file-upload-subtext">PNG, JPG, GIF up to 10MB</div>
+                    <input type="file" name="image" id="image" class="file-input" accept="image/*">
+                </div>
+                <div class="image-preview" id="imagePreview"></div>
+            </div>
+
+            <button type="submit" class="btn-submit">🚀 Publish Post</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Character count
+    const textarea = document.getElementById('caption');
+    const charCount = document.getElementById('charCount');
+
+    textarea.addEventListener('input', function() {
+        charCount.textContent = this.value.length;
+    });
+
+    // File upload preview
+    const fileInput = document.getElementById('image');
+    const preview = document.getElementById('imagePreview');
+    const uploadArea = document.getElementById('uploadArea');
+
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            preview.style.display = 'none';
+        }
+    });
+
+    // Drag and drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+        uploadArea.classList.add('dragover');
+    }
+
+    function unhighlight(e) {
+        uploadArea.classList.remove('dragover');
+    }
+
+    uploadArea.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+
+        if (files.length > 0) {
+            fileInput.files = files;
+            fileInput.dispatchEvent(new Event('change'));
+        }
+    }
+</script>
+
+{% endblock %}
