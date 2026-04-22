@@ -1,0 +1,529 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    .chat-page {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 60px 20px 100px;
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 70px);
+    }
+
+    .chat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .chat-room-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .room-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Syne', sans-serif;
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: white;
+    }
+
+    .room-details h1 {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--text);
+    }
+
+    .room-status {
+        font-size: 0.85rem;
+        color: var(--muted);
+        margin-top: 2px;
+    }
+
+    .status-online {
+        color: var(--success);
+    }
+
+    .chat-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .message {
+        display: flex;
+        gap: 12px;
+        max-width: 70%;
+    }
+
+    .message.own {
+        align-self: flex-end;
+        flex-direction: row-reverse;
+    }
+
+    .message-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    .message.own .message-avatar {
+        background: linear-gradient(135deg, var(--gold), var(--success));
+    }
+
+    .message-content {
+        background: var(--surface2);
+        border-radius: 18px;
+        padding: 12px 16px;
+        position: relative;
+    }
+
+    .message.own .message-content {
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        color: white;
+    }
+
+    .message-sender {
+        font-weight: 600;
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-bottom: 4px;
+    }
+
+    .message.own .message-sender {
+        display: none;
+    }
+
+    .message-text {
+        font-size: 0.95rem;
+        line-height: 1.4;
+        word-wrap: break-word;
+    }
+
+    .message-image {
+        max-width: 250px;
+        border-radius: 12px;
+        margin-top: 8px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    }
+
+    .message-status {
+        font-size: 0.7rem;
+        opacity: 0.7;
+        margin-top: 4px;
+        text-align: right;
+    }
+
+    .typing-indicator {
+        font-size: 0.85rem;
+        color: var(--muted);
+        font-style: italic;
+        padding: 8px 24px;
+    }
+
+    .chat-input-area {
+        border-top: 1px solid var(--border);
+        padding: 20px 24px;
+        background: var(--surface);
+    }
+
+    .input-group {
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+    }
+
+    .message-input {
+        flex: 1;
+        padding: 14px 18px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        color: var(--text);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.95rem;
+        resize: none;
+        min-height: 20px;
+        max-height: 120px;
+        overflow-y: auto;
+    }
+
+    .message-input:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(79,140,255,0.1);
+    }
+
+    .message-input::placeholder {
+        color: var(--muted);
+    }
+
+    .file-input {
+        display: none;
+    }
+
+    .file-label {
+        padding: 14px 16px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        color: var(--muted);
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .file-label:hover {
+        background: var(--surface);
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    .send-btn {
+        padding: 14px 24px;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        border: none;
+        border-radius: var(--radius);
+        color: white;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .send-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(79,140,255,0.3);
+    }
+
+    .back-link {
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: color 0.2s;
+        padding: 8px 16px;
+        border-radius: var(--radius);
+    }
+
+    .back-link:hover {
+        color: var(--text);
+        background: var(--surface2);
+        text-decoration: none;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message {
+        animation: fadeIn 0.3s ease both;
+    }
+
+    .empty-chat {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--muted);
+    }
+
+    .empty-chat-icon {
+        font-size: 4rem;
+        margin-bottom: 16px;
+    }
+
+    .empty-chat-text {
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+    }
+
+    .empty-chat-subtext {
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="chat-page">
+    <div class="chat-header">
+        <div class="chat-room-info">
+            <div class="room-avatar">{{ room|first|upper }}</div>
+            <div class="room-details">
+                <h1>{{ room|title }}</h1>
+                <div class="room-status{% if is_online %} status-online{% endif %}">
+                    {% if is_online %}
+                        🟢 Online
+                    {% else %}
+                        Last seen {{ last_seen|default:"Never" }}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <a href="/feed/" class="back-link">
+            ← Back to Feed
+        </a>
+    </div>
+
+    <div class="chat-container">
+        <div id="chat-messages" class="chat-messages">
+            {% for msg in messages %}
+            <div class="message{% if msg.sender == request.user %} own{% endif %}">
+                {% if msg.sender != request.user %}
+                <div class="message-avatar">{{ msg.sender.username|first|upper }}</div>
+                {% endif %}
+                <div class="message-content">
+                    {% if msg.sender != request.user %}
+                    <div class="message-sender">{{ msg.sender.username }}</div>
+                    {% endif %}
+                    <div class="message-text">{{ msg.text }}</div>
+                    {% if msg.image %}
+                    <img src="{{ msg.image }}" class="message-image" alt="Shared image">
+                    {% endif %}
+                    {% if msg.sender == request.user %}
+                    <div class="message-status">
+                        {% if msg.is_seen %}✓✓ Seen{% else %}✓ Sent{% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% if msg.sender == request.user %}
+                <div class="message-avatar">{{ request.user.username|first|upper }}</div>
+                {% endif %}
+            </div>
+            {% empty %}
+            <div class="empty-chat">
+                <div class="empty-chat-icon">💬</div>
+                <div class="empty-chat-text">No messages yet</div>
+                <div class="empty-chat-subtext">Start the conversation!</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div id="typing-indicator" class="typing-indicator"></div>
+
+        <div class="chat-input-area">
+            <div class="input-group">
+                <textarea
+                    id="message-input"
+                    class="message-input"
+                    placeholder="Type your message..."
+                    rows="1"
+                    onkeydown="handleKeyPress(event)"
+                ></textarea>
+
+                <label for="image-input" class="file-label">
+                    📎
+                </label>
+                <input type="file" id="image-input" class="file-input" accept="image/*">
+
+                <button onclick="sendMessage()" class="send-btn">
+                    Send
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let roomName = "{{ room }}";
+    let currentUser = "{{ request.user.username }}";
+    let chatMessages = document.getElementById('chat-messages');
+    let messageInput = document.getElementById('message-input');
+    let imageInput = document.getElementById('image-input');
+    let typingIndicator = document.getElementById('typing-indicator');
+
+    // WebSocket connection
+    const socket = new WebSocket(
+        'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
+    );
+
+    socket.onopen = function(e) {
+        console.log('WebSocket connected');
+    };
+
+    socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+
+        if (data.message) {
+            const isOwn = data.sender === currentUser;
+            addMessage(data.message, isOwn, null, false, data.sender);
+        }
+
+        if (data.typing) {
+            showTyping(data.typing);
+        }
+
+        if (data.image) {
+            const isOwn = data.sender === currentUser;
+            addMessage('', isOwn, data.image, false, data.sender);
+        }
+
+        scrollToBottom();
+    };
+
+    socket.onclose = function(e) {
+        console.log('WebSocket disconnected');
+    };
+
+    function addMessage(text, isOwn = true, image = null, isSeen = false, sender = null) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message${isOwn ? ' own' : ''}`;
+
+        const avatarDiv = document.createElement('div');
+        avatarDiv.className = 'message-avatar';
+        avatarDiv.textContent = isOwn ? currentUser.charAt(0).toUpperCase() : (sender ? sender.charAt(0).toUpperCase() : 'O');
+
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'message-content';
+
+        if (!isOwn && sender) {
+            const senderDiv = document.createElement('div');
+            senderDiv.className = 'message-sender';
+            senderDiv.textContent = sender;
+            contentDiv.appendChild(senderDiv);
+        }
+
+        if (text) {
+            const textDiv = document.createElement('div');
+            textDiv.className = 'message-text';
+            textDiv.textContent = text;
+            contentDiv.appendChild(textDiv);
+        }
+
+        if (image) {
+            const img = document.createElement('img');
+            img.className = 'message-image';
+            img.src = image;
+            img.alt = 'Shared image';
+            contentDiv.appendChild(img);
+        }
+
+        if (isOwn) {
+            const statusDiv = document.createElement('div');
+            statusDiv.className = 'message-status';
+            statusDiv.textContent = isSeen ? '✓✓ Seen' : '✓ Sent';
+            contentDiv.appendChild(statusDiv);
+        }
+
+        if (isOwn) {
+            messageDiv.appendChild(contentDiv);
+            messageDiv.appendChild(avatarDiv);
+        } else {
+            messageDiv.appendChild(avatarDiv);
+            messageDiv.appendChild(contentDiv);
+        }
+
+        chatMessages.appendChild(messageDiv);
+        scrollToBottom();
+    }
+
+    function sendMessage() {
+        const text = messageInput.value.trim();
+        if (!text) return;
+
+        socket.send(JSON.stringify({
+            type: 'message',
+            message: text
+        }));
+
+        messageInput.value = '';
+        resizeTextarea();
+    }
+
+    function sendImage() {
+        const file = imageInput.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function() {
+            socket.send(JSON.stringify({
+                type: 'image',
+                image: reader.result
+            }));
+        };
+        reader.readAsDataURL(file);
+
+        // Reset file input
+        imageInput.value = '';
+    }
+
+    function showTyping(username) {
+        typingIndicator.textContent = `${username} is typing...`;
+        setTimeout(() => {
+            typingIndicator.textContent = '';
+        }, 1000);
+    }
+
+    function handleKeyPress(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            sendMessage();
+        } else {
+            // Send typing indicator
+            socket.send(JSON.stringify({
+                type: 'typing',
+                user: currentUser
+            }));
+        }
+    }
+
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function resizeTextarea() {
+        messageInput.style.height = 'auto';
+        messageInput.style.height = messageInput.scrollHeight + 'px';
+    }
+
+    // Auto-resize textarea
+    messageInput.addEventListener('input', resizeTextarea);
+
+    // Handle image selection
+    imageInput.addEventListener('change', sendImage);
+
+    // Scroll to bottom on load
+    scrollToBottom();
+</script>
+
+{% endblock %}

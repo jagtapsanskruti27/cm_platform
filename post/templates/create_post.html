@@ -29,6 +29,23 @@
         background-clip: text;
     }
 
+    .back-link {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: color 0.2s;
+    }
+
+    .back-link:hover {
+        color: var(--text);
+    }
+
     .form-group {
         margin-bottom: 24px;
     }
@@ -159,6 +176,7 @@
 </style>
 
 <div class="create-post-page">
+    <a href="/feed/" class="back-link">← Back to Feed</a>
     <div class="create-card">
         <h1 class="create-title">Create New Post</h1>
 

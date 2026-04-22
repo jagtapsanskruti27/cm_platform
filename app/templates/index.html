@@ -327,11 +327,18 @@
         Nexus
     </a>
     <div class="nav-links">
-        <a href="/">Home</a>
-        <a href="/register/">Register</a>
-        <a href="/login/">Login</a>
-        <a href="/profile/">Profile</a>
-        <a href="/register/" class="btn nav-cta">Join Now</a>
+        {% if user.is_authenticated %}
+            <a href="/feed/">Feed</a>
+            <a href="/create-post/">Create Post</a>
+            <a href="/chat/">Chat</a>
+            <a href="/profile/">Profile</a>
+            <a href="/logout/">Logout</a>
+        {% else %}
+            <a href="/">Home</a>
+            <a href="/register/">Register</a>
+            <a href="/login/">Login</a>
+            <a href="/register/" class="btn nav-cta">Join Now</a>
+        {% endif %}
     </div>
 </nav>
 

@@ -5,6 +5,8 @@ from .models import UserProfile
 
 
 def home(request):
+    if request.user.is_authenticated:
+        return redirect('/feed/')
     return render(request, 'home.html')
 
 
@@ -45,7 +47,7 @@ def login_view(request):
 
         if user:
             login(request, user)
-            return redirect('/profile/')
+            return redirect('/feed/')
         else:
             return render(request, 'login.html', {
                 'error': 'Invalid Username or Password'
