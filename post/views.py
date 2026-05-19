@@ -3,12 +3,19 @@ import base64
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Post, Like, Comment
+from event.models import Event, Notification
 
 
 @login_required
 def feed(request):
     posts = Post.objects.all().order_by('-id')
-    return render(request, 'feed.html', {'posts': posts})
+    events = Event.objects.all().order_by('event_date')[:3]
+    notifications = Notification.objects.filter(user=request.user).order_by('-created_at')[:5]
+    return render(request, 'feed.html', {
+        'posts': posts,
+        'events': events,
+        'notifications': notifications
+    })
 
 
 @login_required

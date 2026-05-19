@@ -1,0 +1,62 @@
+{% extends 'index.html' %}
+
+{% block content %}
+
+<style>
+    .notifications-page {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 60px 20px 100px;
+    }
+
+    .notifications-page h1 {
+        font-family: 'Syne', sans-serif;
+        font-size: 2.6rem;
+        margin-bottom: 24px;
+        color: var(--text);
+    }
+
+    .notification-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 22px;
+        margin-bottom: 18px;
+    }
+
+    .notification-card p {
+        margin: 0;
+        color: var(--text);
+        line-height: 1.7;
+    }
+
+    .notification-timestamp {
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 0.95rem;
+    }
+
+    .empty-message {
+        margin-top: 20px;
+        padding: 24px;
+        text-align: center;
+        border-radius: var(--radius);
+        background: var(--surface2);
+        color: var(--muted);
+    }
+</style>
+
+<div class="notifications-page">
+    <h1>Notifications</h1>
+
+    {% for notification in notifications %}
+    <div class="notification-card">
+        <p>{{ notification.message }}</p>
+        <div class="notification-timestamp">{{ notification.created_at|date:'M j, Y H:i' }}</div>
+    </div>
+    {% empty %}
+    <div class="empty-message">No notifications yet.</div>
+    {% endfor %}
+</div>
+
+{% endblock %}

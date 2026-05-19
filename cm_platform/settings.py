@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'post',
     'channels',
     'chat',
+    'event',
 ]
 ASGI_APPLICATION = 'cm_platform.asgi.application'
 
@@ -130,6 +131,9 @@ STATIC_URL = 'static/'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# URL to redirect users to for login when using `login_required` or other auth
+LOGIN_URL = '/login/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

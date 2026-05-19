@@ -20,12 +20,13 @@ from app.views import home
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("",include("app.urls")),
+    path("", include("app.urls")),
     path("", include("post.urls")),
-    path("", include("chat.urls"))
-    
-
-]
+    path("", include("chat.urls")),
+    path("", include("event.urls"))
+     
+   
+]    
 
 from django.conf import settings
 from django.conf.urls.static import static
