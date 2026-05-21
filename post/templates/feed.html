@@ -28,7 +28,7 @@
         border: 1px solid var(--border);
         border-radius: var(--radius);
         padding: 24px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     }
 
     .panel-header {
@@ -118,7 +118,7 @@
 
     .create-post-btn:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(79,140,255,0.3);
+        box-shadow: 0 8px 24px rgba(79, 140, 255, 0.3);
         text-decoration: none;
         color: white;
     }
@@ -129,13 +129,13 @@
         border-radius: var(--radius);
         padding: 24px;
         margin-bottom: 24px;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
         transition: transform 0.2s, box-shadow 0.2s;
     }
 
     .post-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     }
 
     .post-header {
@@ -192,7 +192,7 @@
         width: 100%;
         border-radius: var(--radius);
         margin-bottom: 16px;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     }
 
     .post-actions {
@@ -227,7 +227,7 @@
     }
 
     .action-btn.liked {
-        background: rgba(255,90,110,0.1);
+        background: rgba(255, 90, 110, 0.1);
         border-color: var(--danger);
         color: var(--danger);
     }
@@ -265,7 +265,7 @@
     .comment-input:focus {
         outline: none;
         border-color: var(--accent);
-        box-shadow: 0 0 0 3px rgba(79,140,255,0.1);
+        box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.1);
     }
 
     .comment-input::placeholder {
@@ -349,28 +349,131 @@
     }
 
     @keyframes slideIn {
-        from { opacity: 0; transform: translateY(30px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .post-card {
         animation: slideIn 0.5s ease both;
     }
 
-    .post-card:nth-child(1) { animation-delay: 0.1s; }
-    .post-card:nth-child(2) { animation-delay: 0.2s; }
-    .post-card:nth-child(3) { animation-delay: 0.3s; }
-    .post-card:nth-child(4) { animation-delay: 0.4s; }
-    .post-card:nth-child(5) { animation-delay: 0.5s; }
+    .post-card:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .post-card:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .post-card:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    .post-card:nth-child(4) {
+        animation-delay: 0.4s;
+    }
+
+    .post-card:nth-child(5) {
+        animation-delay: 0.5s;
+    }
+
+    .message-banner {
+        background: #22c55e;
+        color: white;
+        padding: 14px 18px;
+        margin-bottom: 20px;
+        border-radius: 12px;
+        font-weight: 600;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        opacity: 1;
+        transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    #message-container.hide {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    .search-results {
+        margin-bottom: 24px;
+        padding: 20px;
+        border-radius: 18px;
+        background: rgba(241,245,249,0.8);
+        border: 1px solid rgba(148,163,184,0.25);
+    }
+
+    .search-results h2 {
+        margin: 0 0 12px;
+        font-size: 1rem;
+        color: var(--text);
+    }
+
+    .search-result {
+        padding: 14px 18px;
+        border-radius: 14px;
+        background: white;
+        border: 1px solid rgba(148,163,184,0.15);
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .search-result:last-child {
+        margin-bottom: 0;
+    }
+
+    .search-result a {
+        color: var(--text);
+        font-weight: 600;
+        text-decoration: none;
+    }
 </style>
 
 <div class="feed-page">
+
+    {% if messages %}
+        <div id="message-container">
+            {% for message in messages %}
+                <div class="message-banner {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     <div class="feed-header">
         <h1 class="feed-title">Community Feed</h1>
         <a href="/create-post/" class="create-post-btn">
             ✏️ Create Post
         </a>
     </div>
+
+    {% if query %}
+        <div class="search-results">
+            <h2>Search results for "{{ query }}"</h2>
+            {% if users %}
+                {% for user in users %}
+                    <div class="search-result">
+                        <span>{{ user.username }}</span>
+                        <a href="#">View</a>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="search-result">
+                    No users found matching your query.
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
 
     {% for post in posts %}
     <div class="post-card">
@@ -397,6 +500,13 @@
             <button class="action-btn comment-toggle" data-post-id="{{ post.id }}">
                 💬 Comments ({{ post.comment_set.count }})
             </button>
+            <a href="/report/{{ post.id }}/" class="action-btn">
+                🚩 Report
+            </a>
+
+            <a href="/block/{{ post.user.id }}/" class="action-btn">
+                🚫 Block
+            </a>
         </div>
 
         <div class="comments-section" id="comments-{{ post.id }}">
@@ -429,10 +539,10 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const commentButtons = document.querySelectorAll('.comment-toggle');
         commentButtons.forEach(button => {
-            button.addEventListener('click', function() {
+            button.addEventListener('click', function () {
                 const postId = this.getAttribute('data-post-id');
                 scrollToComments(postId);
             });
@@ -442,6 +552,16 @@
     function scrollToComments(postId) {
         const commentsSection = document.getElementById(`comments-${postId}`);
         commentsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    const messageContainer = document.getElementById('message-container');
+    if (messageContainer) {
+        window.setTimeout(() => {
+            messageContainer.classList.add('hide');
+            window.setTimeout(() => {
+                messageContainer.remove();
+            }, 450);
+        }, 3200);
     }
 </script>
 

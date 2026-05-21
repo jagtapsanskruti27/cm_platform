@@ -123,6 +123,35 @@
             background: linear-gradient(135deg, var(--accent), var(--accent2)) !important;
         }
 
+        .nav-search-form {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 16px;
+        }
+
+        .nav-search-input {
+            width: 180px;
+            padding: 9px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.28);
+            background: rgba(255,255,255,0.12);
+            color: white;
+            font-size: 0.92rem;
+            transition: width 0.2s ease, border-color 0.2s ease;
+        }
+
+        .nav-search-input:focus {
+            width: 230px;
+            outline: none;
+            border-color: rgba(255,255,255,0.8);
+            background: rgba(255,255,255,0.22);
+        }
+
+        .nav-search-submit {
+            display: none;
+        }
+
         /* ── PAGE WRAPPER ── */
         .page {
             min-height: 100vh;
@@ -342,6 +371,19 @@
             <a href="/register/" class="btn nav-cta">Join Now</a>
         {% endif %}
     </div>
+
+    {% if user.is_authenticated %}
+        <form class="nav-search-form" method="GET" action="/feed/">
+            <input
+                class="nav-search-input"
+                type="text"
+                name="q"
+                placeholder="Search users"
+                value="{{ request.GET.q|default:'' }}"
+            />
+            <button class="nav-search-submit" type="submit">Search</button>
+        </form>
+    {% endif %}
 </nav>
 
 <div class="page">

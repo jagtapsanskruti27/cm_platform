@@ -2,6 +2,7 @@ import base64
 
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from .models import Post, Like, Comment
 from event.models import Event, Notification
 
@@ -11,10 +12,19 @@ def feed(request):
     posts = Post.objects.all().order_by('-id')
     events = Event.objects.all().order_by('event_date')[:3]
     notifications = Notification.objects.filter(user=request.user).order_by('-created_at')[:5]
+
+    query = request.GET.get('q', '').strip()
+    users = []
+
+    if query:
+        users = User.objects.filter(username__icontains=query)
+
     return render(request, 'feed.html', {
         'posts': posts,
         'events': events,
-        'notifications': notifications
+        'notifications': notifications,
+        'users': users,
+        'query': query,
     })
 
 

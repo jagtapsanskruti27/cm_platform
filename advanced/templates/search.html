@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Users</title>
+
+    <style>
+
+        body{
+            font-family: Arial;
+            background: #f2f2f2;
+            padding: 40px;
+        }
+
+        .container{
+            width: 500px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        input{
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+
+        .user{
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .user a{
+            text-decoration: none;
+            color: black;
+            font-weight: bold;
+        }
+
+    </style>
+
+</head>
+<body>
+
+<div class="container">
+
+    <h2>🔍 Search Users</h2>
+
+    <form method="GET">
+
+        <input
+            type="text"
+            name="q"
+            placeholder="Search username..."
+            value="{{ request.GET.q }}"
+        >
+
+    </form>
+
+    {% for user in users %}
+
+        <div class="user">
+
+            <a href="#">
+                {{ user.username }}
+            </a>
+
+        </div>
+
+    {% empty %}
+
+        <p>No users found.</p>
+
+    {% endfor %}
+
+</div>
+
+</body>
+</html>

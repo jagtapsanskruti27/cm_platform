@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'channels',
     'chat',
     'event',
+    'advanced',
 ]
 ASGI_APPLICATION = 'cm_platform.asgi.application'
 

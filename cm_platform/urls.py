@@ -23,9 +23,8 @@ urlpatterns = [
     path("", include("app.urls")),
     path("", include("post.urls")),
     path("", include("chat.urls")),
-    path("", include("event.urls"))
-     
-   
+    path("", include("event.urls")),
+    path("", include("advanced.urls")),
 ]    
 
 from django.conf import settings
