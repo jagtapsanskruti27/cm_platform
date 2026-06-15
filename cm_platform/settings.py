@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'chat',
     'event',
     'advanced',
+    'analytics.dashboard',
 ]
 ASGI_APPLICATION = 'cm_platform.asgi.application'
 

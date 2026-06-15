@@ -25,6 +25,7 @@ urlpatterns = [
     path("", include("chat.urls")),
     path("", include("event.urls")),
     path("", include("advanced.urls")),
+    path("", include("analytics.dashboard.urls")),
 ]    
 
 from django.conf import settings

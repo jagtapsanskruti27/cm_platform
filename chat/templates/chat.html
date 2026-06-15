@@ -372,9 +372,10 @@
     let imageInput = document.getElementById('image-input');
     let typingIndicator = document.getElementById('typing-indicator');
 
-    // WebSocket connection
+    // WebSocket connection (choose ws or wss depending on page protocol)
+    const wsScheme = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
     const socket = new WebSocket(
-        'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
+        wsScheme + window.location.host + '/ws/chat/' + roomName + '/'
     );
 
     socket.onopen = function(e) {
