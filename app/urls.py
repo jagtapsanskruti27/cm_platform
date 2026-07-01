@@ -7,4 +7,6 @@ urlpatterns = [
     path('login/', login_view),
     path('profile/', profile_view),
     path('logout/', logout_view),
+    path('edit-profile/', edit_profile, name='edit_profile'),
+    path('follow/<int:user_id>/', follow_user, name='follow_user'),
 ]

@@ -391,7 +391,7 @@
         margin-bottom: 20px;
         border-radius: 12px;
         font-weight: 600;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
         opacity: 1;
         transition: opacity 0.4s ease, transform 0.4s ease;
     }
@@ -405,8 +405,8 @@
         margin-bottom: 24px;
         padding: 20px;
         border-radius: 18px;
-        background: rgba(241,245,249,0.8);
-        border: 1px solid rgba(148,163,184,0.25);
+        background: rgba(241, 245, 249, 0.8);
+        border: 1px solid rgba(148, 163, 184, 0.25);
     }
 
     .search-results h2 {
@@ -419,7 +419,7 @@
         padding: 14px 18px;
         border-radius: 14px;
         background: white;
-        border: 1px solid rgba(148,163,184,0.15);
+        border: 1px solid rgba(148, 163, 184, 0.15);
         margin-bottom: 12px;
         display: flex;
         align-items: center;
@@ -441,13 +441,13 @@
 <div class="feed-page">
 
     {% if messages %}
-        <div id="message-container">
-            {% for message in messages %}
-                <div class="message-banner {{ message.tags }}">
-                    {{ message }}
-                </div>
-            {% endfor %}
+    <div id="message-container">
+        {% for message in messages %}
+        <div class="message-banner {{ message.tags }}">
+            {{ message }}
         </div>
+        {% endfor %}
+    </div>
     {% endif %}
 
     <div class="feed-header">
@@ -457,33 +457,103 @@
         </a>
     </div>
 
-    {% if query %}
-        <div class="search-results">
-            <h2>Search results for "{{ query }}"</h2>
-            {% if users %}
-                {% for user in users %}
-                    <div class="search-result">
-                        <span>{{ user.username }}</span>
-                        <a href="#">View</a>
-                    </div>
-                {% endfor %}
-            {% else %}
-                <div class="search-result">
-                    No users found matching your query.
+    <div class="dashboard-panel" style="margin-bottom:20px;">
+    <div class="panel-header">
+        <h3 class="panel-title">🔔 Notifications</h3>
+    </div>
+
+    {% if notifications %}
+        {% for notification in notifications %}
+            <div class="notification-item">
+                <div>{{ notification.message }}</div>
+
+                <div class="notification-meta">
+                    {{ notification.created_at }}
                 </div>
-            {% endif %}
+
+                <a href="/notification/read/{{ notification.id }}/"
+                   class="action-btn"
+                   style="margin-top:10px;display:inline-block;">
+                    Mark as Read
+                </a>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="no-items">
+            No new notifications.
+        </div>
+    {% endif %}
+</div>
+
+    {% if query %}
+<div class="search-results">
+    <h2>Search results for "{{ query }}"</h2>
+
+    <!-- User Results -->
+    {% if users %}
+        <h3>Users</h3>
+
+        {% for user in users %}
+        <div class="search-result">
+            <span>{{ user.username }}</span>
+            <a href="#">View</a>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Post Results -->
+    {% if searched_posts %}
+        <h3>Matching Posts</h3>
+
+        {% for post in searched_posts %}
+        <div class="search-result">
+            <strong>{{ post.user.username }}</strong>
+            <br>
+            {{ post.caption }}
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if not users and not searched_posts %}
+        <div class="search-result">
+            No results found.
         </div>
     {% endif %}
 
-    {% for post in posts %}
+</div>
+{% endif %}
+
+    
+{% for post in posts %}
     <div class="post-card">
-        <div class="post-header">
-            <div class="post-avatar">{{ post.user.username|first|upper }}</div>
-            <div class="post-user-info">
-                <div class="post-username">{{ post.user.username }}</div>
-                <div class="post-timestamp">2 hours ago</div>
-            </div>
-        </div>
+      <div class="post-header">
+    <div class="post-avatar">{{ post.user.username|first|upper }}</div>
+
+    <div class="post-user-info">
+    <div class="post-username">{{ post.user.username }}</div>
+
+   
+
+    <div style="font-size:12px;color:gray;">
+        Followers: {{ post.user.followers.count }}
+    </div>
+
+    <div class="post-timestamp">2 hours ago</div>
+</div>
+
+    {% if post.user != request.user %}
+    <a href="/follow/{{ post.user.id }}/" class="action-btn">
+        ➕ Follow
+    </a>
+    {% endif %}
+
+    {% if post.user != request.user %}
+<a href="/chat/private/{{ post.user.id }}/" class="action-btn">
+    💬 Message
+</a>
+{% endif %}
+</div>
+        
 
         <div class="post-content">
             <div class="post-caption">{{ post.caption }}</div>
@@ -495,7 +565,7 @@
 
         <div class="post-actions">
             <a href="/like/{{ post.id }}/" class="action-btn">
-                ❤️ Like ({{ post.likes.count }})
+                ❤️ Like ({{ post.like_set.count }})
             </a>
             <button class="action-btn comment-toggle" data-post-id="{{ post.id }}">
                 💬 Comments ({{ post.comment_set.count }})
@@ -507,6 +577,18 @@
             <a href="/block/{{ post.user.id }}/" class="action-btn">
                 🚫 Block
             </a>
+
+             {% if post.user == request.user %}
+    <a href="/delete-post/{{ post.id }}/" class="action-btn">
+        🗑️ Delete
+    </a>
+    {% endif %}
+            <!-- <form method="POST" action="/delete-post/{{ post.id }}/">
+    {% csrf_token %}
+    <button type="submit" class="action-btn">
+        🗑️ Delete
+    </button>
+</form> -->
         </div>
 
         <div class="comments-section" id="comments-{{ post.id }}">
@@ -518,16 +600,7 @@
                 <button type="submit" class="comment-submit">Post</button>
             </form>
 
-            {% for c in post.comment_set.all %}
-            <div class="comment">
-                <div class="comment-avatar">{{ c.user.username|first|upper }}</div>
-                <div class="comment-content">
-                    <div class="comment-username">{{ c.user.username }}</div>
-                    <div class="comment-text">{{ c.text }}</div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
+        
     </div>
     {% empty %}
     <div class="no-posts">
@@ -564,5 +637,23 @@
         }, 3200);
     }
 </script>
+
+<div style="text-align:center;margin-top:20px;">
+
+    {% if posts.has_previous %}
+        <a href="?page={{ posts.previous_page_number }}">
+            Previous
+        </a>
+    {% endif %}
+
+    Page {{ posts.number }} of {{ posts.paginator.num_pages }}
+
+    {% if posts.has_next %}
+        <a href="?page={{ posts.next_page_number }}">
+            Next
+        </a>
+    {% endif %}
+
+</div>
 
 {% endblock %}

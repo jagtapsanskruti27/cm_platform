@@ -288,9 +288,9 @@
 <div class="chat-page">
     <div class="chat-header">
         <div class="chat-room-info">
-            <div class="room-avatar">{{ room|first|upper }}</div>
+            <div class="room-avatar">{{ other_user.username|first|upper }}</div>
             <div class="room-details">
-                <h1>{{ room|title }}</h1>
+                <h1>{{ other_user.username|title }}</h1>
                 <div class="room-status{% if is_online %} status-online{% endif %}">
                     {% if is_online %}
                         🟢 Online
@@ -356,175 +356,125 @@
                 </label>
                 <input type="file" id="image-input" class="file-input" accept="image/*">
 
-                <button onclick="sendMessage()" class="send-btn">
+                <button onclick="sendMsg()" class="send-btn">
                     Send
                 </button>
             </div>
         </div>
     </div>
 </div>
-
 <script>
-    let roomName = "{{ room }}";
-    let currentUser = "{{ request.user.username }}";
-    let chatMessages = document.getElementById('chat-messages');
-    let messageInput = document.getElementById('message-input');
-    let imageInput = document.getElementById('image-input');
-    let typingIndicator = document.getElementById('typing-indicator');
 
-    // WebSocket connection (choose ws or wss depending on page protocol)
-    const wsScheme = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-    const socket = new WebSocket(
-        wsScheme + window.location.host + '/ws/chat/' + roomName + '/'
-    );
+let room = "{{ room }}";
 
-    socket.onopen = function(e) {
-        console.log('WebSocket connected');
-    };
+const wsScheme = window.location.protocol === 'https:' 
+? 'wss://' 
+: 'ws://';
 
-    socket.onmessage = function(e) {
-        const data = JSON.parse(e.data);
 
-        if (data.message) {
-            const isOwn = data.sender === currentUser;
-            addMessage(data.message, isOwn, null, false, data.sender);
-        }
+let socket = new WebSocket(
+    wsScheme +
+    window.location.host +
+    "/ws/private/" +
+    room +
+    "/"
+);
 
-        if (data.typing) {
-            showTyping(data.typing);
-        }
+socket.onmessage=function(e){
 
-        if (data.image) {
-            const isOwn = data.sender === currentUser;
-            addMessage('', isOwn, data.image, false, data.sender);
-        }
+    let data = JSON.parse(e.data);
 
-        scrollToBottom();
-    };
+    if(data.message){
 
-    socket.onclose = function(e) {
-        console.log('WebSocket disconnected');
-    };
+        addMessage(
+            data.message,
+            data.sender == "{{ request.user.username }}",
+            null,
+            false,
+            data.sender
+        );
 
-    function addMessage(text, isOwn = true, image = null, isSeen = false, sender = null) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message${isOwn ? ' own' : ''}`;
-
-        const avatarDiv = document.createElement('div');
-        avatarDiv.className = 'message-avatar';
-        avatarDiv.textContent = isOwn ? currentUser.charAt(0).toUpperCase() : (sender ? sender.charAt(0).toUpperCase() : 'O');
-
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'message-content';
-
-        if (!isOwn && sender) {
-            const senderDiv = document.createElement('div');
-            senderDiv.className = 'message-sender';
-            senderDiv.textContent = sender;
-            contentDiv.appendChild(senderDiv);
-        }
-
-        if (text) {
-            const textDiv = document.createElement('div');
-            textDiv.className = 'message-text';
-            textDiv.textContent = text;
-            contentDiv.appendChild(textDiv);
-        }
-
-        if (image) {
-            const img = document.createElement('img');
-            img.className = 'message-image';
-            img.src = image;
-            img.alt = 'Shared image';
-            contentDiv.appendChild(img);
-        }
-
-        if (isOwn) {
-            const statusDiv = document.createElement('div');
-            statusDiv.className = 'message-status';
-            statusDiv.textContent = isSeen ? '✓✓ Seen' : '✓ Sent';
-            contentDiv.appendChild(statusDiv);
-        }
-
-        if (isOwn) {
-            messageDiv.appendChild(contentDiv);
-            messageDiv.appendChild(avatarDiv);
-        } else {
-            messageDiv.appendChild(avatarDiv);
-            messageDiv.appendChild(contentDiv);
-        }
-
-        chatMessages.appendChild(messageDiv);
-        scrollToBottom();
     }
 
-    function sendMessage() {
-        const text = messageInput.value.trim();
-        if (!text) return;
+};
 
-        socket.send(JSON.stringify({
-            type: 'message',
-            message: text
-        }));
 
-        messageInput.value = '';
-        resizeTextarea();
-    }
 
-    function sendImage() {
-        const file = imageInput.files[0];
-        if (!file) return;
+function sendMsg(){
 
-        const reader = new FileReader();
-        reader.onload = function() {
-            socket.send(JSON.stringify({
-                type: 'image',
-                image: reader.result
-            }));
-        };
-        reader.readAsDataURL(file);
+let input = document.getElementById("message-input");
 
-        // Reset file input
-        imageInput.value = '';
-    }
+let text = input.value.trim();
 
-    function showTyping(username) {
-        typingIndicator.textContent = `${username} is typing...`;
-        setTimeout(() => {
-            typingIndicator.textContent = '';
-        }, 1000);
-    }
+if(!text)
+    return;
 
-    function handleKeyPress(event) {
-        if (event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault();
-            sendMessage();
-        } else {
-            // Send typing indicator
-            socket.send(JSON.stringify({
-                type: 'typing',
-                user: currentUser
-            }));
-        }
-    }
 
-    function scrollToBottom() {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
+socket.send(JSON.stringify({
 
-    function resizeTextarea() {
-        messageInput.style.height = 'auto';
-        messageInput.style.height = messageInput.scrollHeight + 'px';
-    }
+    type:"message",
 
-    // Auto-resize textarea
-    messageInput.addEventListener('input', resizeTextarea);
+    message:text,
 
-    // Handle image selection
-    imageInput.addEventListener('change', sendImage);
+    receiver:"{{ other_user.id }}"
 
-    // Scroll to bottom on load
-    scrollToBottom();
+}));
+
+
+// show message immediately
+addMessage(
+    text,
+    true,
+    null,
+    false,
+    "{{ request.user.username }}"
+);
+
+
+input.value="";
+
+}
+
+function addMessage(text, isOwn, image=null, isSeen=false, sender=null){
+
+let box=document.getElementById("chat-messages");
+
+
+box.innerHTML += `
+
+<div class="message ${isOwn ? 'own':''}">
+
+<div class="message-content">
+
+<div class="message-text">
+${text}
+</div>
+
+</div>
+
+</div>
+
+`;
+
+box.scrollTop = box.scrollHeight;
+
+}
+
+
+function typingNow(){
+
+
+socket.send(JSON.stringify({
+
+type:"typing",
+
+user:"{{request.user.username}}"
+
+}));
+
+}
+
+
 </script>
 
 {% endblock %}

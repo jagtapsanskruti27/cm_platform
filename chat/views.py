@@ -1,12 +1,17 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+
 from .models import Message, UserStatus
 
 
+# ======================================
+# GENERAL CHAT
+# ======================================
+
 @login_required
 def chat_index(request):
-    return redirect('chat', room='general')
+    return redirect("chat", room="general")
 
 
 @login_required
@@ -16,46 +21,66 @@ def chat_page(request, room):
         group_name=room
     ).order_by("created_at")
 
-    other_user = None
     is_online = False
     last_seen = None
 
-    # for one-to-one room example: user1_user2
-    if "_" in room:
-        usernames = room.split("_")
+    try:
+        status = UserStatus.objects.get(user=request.user)
+        is_online = status.is_online
+        last_seen = status.last_seen
+    except UserStatus.DoesNotExist:
+        pass
 
-        for uname in usernames:
-            if uname != request.user.username:
-                try:
-                    other_user = User.objects.get(username=uname)
-                except:
-                    pass
+    return render(
+        request,
+        "chat/chat.html",
+        {
+            "room": room,
+            "messages": messages,
+            "is_online": is_online,
+            "last_seen": last_seen,
+        }
+    )
 
-        if other_user:
-            try:
-                status = UserStatus.objects.get(user=other_user)
-                is_online = status.is_online
-                last_seen = status.last_seen
-            except:
-                pass
 
-            # mark messages as seen
-            Message.objects.filter(
-                sender=other_user,
-                receiver=request.user,
-                is_seen=False
-            ).update(is_seen=True)
+# ======================================
+# PRIVATE CHAT
+# ======================================
 
-            messages = Message.objects.filter(
-                sender__in=[request.user, other_user],
-                receiver__in=[request.user, other_user]
-            ).order_by("created_at")
+@login_required
+def private_chat(request, user_id):
 
-    context = {
-        "room": room,
-        "messages": messages,
-        "is_online": is_online,
-        "last_seen": last_seen,
-    }
+    other_user = User.objects.get(id=user_id)
 
-    return render(request, "chat.html", context)
+    ids = sorted([
+        request.user.id,
+        other_user.id
+    ])
+
+    room = f"private_{ids[0]}_{ids[1]}"
+
+    messages = Message.objects.filter(
+        group_name=room
+    ).order_by("created_at")
+
+    is_online = False
+    last_seen = None
+
+    try:
+        status = UserStatus.objects.get(user=other_user)
+        is_online = status.is_online
+        last_seen = status.last_seen
+    except UserStatus.DoesNotExist:
+        pass
+
+    return render(
+        request,
+        "chat/private_chat.html",
+        {
+            "room": room,
+            "messages": messages,
+            "other_user": other_user,
+            "is_online": is_online,
+            "last_seen": last_seen,
+        }
+    )

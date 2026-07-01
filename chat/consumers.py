@@ -1,78 +1,187 @@
 ﻿import json
+
 from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.db import database_sync_to_async
+from django.contrib.auth.models import User
+
+from .models import Message
 
 
-class ChatConsumer(AsyncWebsocketConsumer):
+# ==================================================
+# GENERAL CHAT
+# ==================================================
+
+class GeneralChatConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
-        room_info = self.scope['url_route']['kwargs']
-        print(f"WebSocket connect attempt for room: {room_info}")
-        self.room = self.scope['url_route']['kwargs']['room']
-        self.room_group = "chat_" + self.room
 
-        # Check authentication
-        user = self.scope.get('user')
-        print(f"User: {user}, Is authenticated: {user.is_authenticated if user else False}")
+        self.group_name = "general_chat"
 
         await self.channel_layer.group_add(
-            self.room_group,
+            self.group_name,
             self.channel_name
         )
 
         await self.accept()
-        print("WebSocket connection accepted")
 
     async def disconnect(self, close_code):
+
         await self.channel_layer.group_discard(
-            self.room_group,
+            self.group_name,
             self.channel_name
         )
 
     async def receive(self, text_data):
+
         data = json.loads(text_data)
 
-        message_type = data.get('type', 'message')
+        # typing
+        if data.get("type") == "typing":
 
-        if message_type == 'message':
             await self.channel_layer.group_send(
-                self.room_group,
+                self.group_name,
                 {
-                    'type': 'chat_message',
-                    'message': data['message'],
-                    'sender': self.scope['user'].username if self.scope['user'].is_authenticated else 'Anonymous'
+                    "type": "typing_message",
+                    "user": self.scope["user"].username
                 }
             )
-        elif message_type == 'typing':
+            return
+
+        # message
+        if data.get("type") == "message":
+
+            text = data.get("message")
+
+            if not text:
+                return
+
+            await self.save_general_message(text)
+
             await self.channel_layer.group_send(
-                self.room_group,
+                self.group_name,
                 {
-                    'type': 'user_typing',
-                    'user': data['user']
-                }
-            )
-        elif message_type == 'image':
-            await self.channel_layer.group_send(
-                self.room_group,
-                {
-                    'type': 'chat_image',
-                    'image': data['image'],
-                    'sender': self.scope['user'].username if self.scope['user'].is_authenticated else 'Anonymous'
+                    "type": "chat_message",
+                    "message": text,
+                    "sender": self.scope["user"].username
                 }
             )
 
     async def chat_message(self, event):
-        await self.send(text_data=json.dumps({
-            'message': event['message'],
-            'sender': event['sender']
-        }))
 
-    async def user_typing(self, event):
-        await self.send(text_data=json.dumps({
-            'typing': event['user'] + ' is typing...'
-        }))
+        await self.send(
+            text_data=json.dumps({
+                "message": event["message"],
+                "sender": event["sender"]
+            })
+        )
 
-    async def chat_image(self, event):
-        await self.send(text_data=json.dumps({
-            'image': event['image'],
-            'sender': event['sender']
-        }))
+    async def typing_message(self, event):
+
+        await self.send(
+            text_data=json.dumps({
+                "typing": event["user"]
+            })
+        )
+
+    @database_sync_to_async
+    def save_general_message(self, text):
+
+        Message.objects.create(
+            sender=self.scope["user"],
+            text=text,
+            group_name="general"
+        )
+
+
+# ==================================================
+# PRIVATE CHAT
+# ==================================================
+
+class PrivateChatConsumer(AsyncWebsocketConsumer):
+
+    async def connect(self):
+
+        self.room = self.scope["url_route"]["kwargs"]["room"]
+
+        await self.channel_layer.group_add(
+            self.room,
+            self.channel_name
+        )
+
+        await self.accept()
+
+    async def disconnect(self, close_code):
+
+        await self.channel_layer.group_discard(
+            self.room,
+            self.channel_name
+        )
+
+    async def receive(self, text_data):
+
+        data = json.loads(text_data)
+
+        # typing
+        if data.get("type") == "typing":
+
+            await self.channel_layer.group_send(
+                self.room,
+                {
+                    "type": "typing_private",
+                    "user": self.scope["user"].username
+                }
+            )
+            return
+
+        # message
+        if data.get("type") == "message":
+
+            text = data.get("message")
+
+            receiver = data.get("receiver")
+
+            if not text:
+                return
+
+            await self.save_private_message(
+                text,
+                receiver
+            )
+
+            await self.channel_layer.group_send(
+                self.room,
+                {
+                    "type": "private_message",
+                    "message": text,
+                    "sender": self.scope["user"].username
+                }
+            )
+
+    async def private_message(self, event):
+
+        await self.send(
+            text_data=json.dumps({
+                "message": event["message"],
+                "sender": event["sender"]
+            })
+        )
+
+    async def typing_private(self, event):
+
+        await self.send(
+            text_data=json.dumps({
+                "typing": event["user"]
+            })
+        )
+
+    @database_sync_to_async
+    def save_private_message(self, text, receiver_id):
+
+        receiver = User.objects.get(id=receiver_id)
+
+        Message.objects.create(
+            sender=self.scope["user"],
+            receiver=receiver,
+            text=text,
+            group_name=self.room
+        )

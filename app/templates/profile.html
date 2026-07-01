@@ -359,7 +359,15 @@
     <!-- HEADER -->
     <div class="profile-header anim-2">
         <div class="profile-avatar-wrap">
-            <div class="profile-avatar">{{ username|first|upper }}</div>
+            {% if request.user.profile.profile_picture %}
+<img src="{{ request.user.profile.profile_picture.url }}"
+     class="profile-avatar"
+     alt="Profile Picture">
+{% else %}
+<div class="profile-avatar">
+    {{ username|first|upper }}
+</div>
+{% endif %}
             <div class="online-ring"></div>
         </div>
 
@@ -374,7 +382,11 @@
                 </div>
             </div>
             <div class="profile-actions">
-                <button class="btn btn-ghost" style="padding:9px 18px;font-size:0.85rem;">✏️ Edit Profile</button>
+                <a href="{% url 'edit_profile' %}">
+    <button class="btn btn-ghost" style="padding:9px 18px;font-size:0.85rem;">
+        ✏️ Edit Profile
+    </button>
+</a>
                 <button class="btn btn-ghost" style="padding:9px 18px;font-size:0.85rem;">⚙ Settings</button>
                 <a href="/logout/">
                     <button class="btn btn-danger" style="padding:9px 18px;font-size:0.85rem;">← Sign out</button>
@@ -386,15 +398,15 @@
     <!-- STATS ROW -->
     <div class="profile-stats anim-3">
         <div class="pstat">
-            <span class="pstat-number" style="background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">247</span>
+            <span class="pstat-number" style="background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">{{ post_count }}</span>
             <span class="pstat-label">Posts</span>
         </div>
         <div class="pstat">
-            <span class="pstat-number" style="background:linear-gradient(135deg,var(--accent2),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">1.2K</span>
+            <span class="pstat-number" style="background:linear-gradient(135deg,var(--accent2),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">{{ followers_count }}</span>
             <span class="pstat-label">Followers</span>
         </div>
         <div class="pstat">
-            <span class="pstat-number" style="background:linear-gradient(135deg,var(--gold),var(--success));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">384</span>
+            <span class="pstat-number" style="background:linear-gradient(135deg,var(--gold),var(--success));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">{{ following_count }}</span>
             <span class="pstat-label">Following</span>
         </div>
         <div class="pstat">
@@ -413,7 +425,7 @@
             <div class="info-card">
                 <div class="info-card-title">
                     Account Information
-                    <a href="#">Edit →</a>
+                    <a href="{% url 'edit_profile' %}">Edit →</a>
                 </div>
 
                 <div class="info-row">
@@ -463,7 +475,7 @@
             <div class="info-card">
                 <div class="info-card-title">
                     Recent Activity
-                    <a href="#">View all →</a>
+                    <a href="/feed/">View all →</a>
                 </div>
 
                 <div class="activity-item-row">
@@ -539,12 +551,12 @@
             <div class="info-card">
                 <div class="info-card-title">Quick Actions</div>
                 <div style="display:flex;flex-direction:column;gap:10px;">
-                    <button class="btn btn-ghost" style="justify-content:flex-start;font-size:0.85rem;gap:12px;padding:11px 16px;">📝 New post</button>
-                    <button class="btn btn-ghost" style="justify-content:flex-start;font-size:0.85rem;gap:12px;padding:11px 16px;">💬 Browse discussions</button>
-                    <button class="btn btn-ghost" style="justify-content:flex-start;font-size:0.85rem;gap:12px;padding:11px 16px;">🔔 Notifications</button>
-                    <button class="btn btn-ghost" style="justify-content:flex-start;font-size:0.85rem;gap:12px;padding:11px 16px;">⚙ Account settings</button>
+                    <a href="/create-post/" class="btn btn-ghost">📝 New Post</a>
+                    <a href="/feed/" class="btn btn-ghost">💬 Browse Discussions</a>
+                    <a href="/notifications/" class="btn btn-ghost">🔔 Notifications</a>
+                    <a href="{% url 'edit_profile' %}" class="btn btn-ghost">⚙ Account Settings</a>
                 </div>
-            </div>
+            </div>  
 
         </div>
     </div>

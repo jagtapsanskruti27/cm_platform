@@ -1,7 +1,26 @@
 from django.urls import path
-from .views import chat_page, chat_index
+from . import views
 
 urlpatterns = [
-    path("chat/", chat_index, name="chat_index"),
-    path("chat/<str:room>/", chat_page, name="chat"),
+
+    # General Chat
+    path(
+        "chat/",
+        views.chat_index,
+        name="chat_index"
+    ),
+
+    path(
+        "chat/<str:room>/",
+        views.chat_page,
+        name="chat"
+    ),
+
+    # Private Chat
+    path(
+        "chat/private/<int:user_id>/",
+        views.private_chat,
+        name="private_chat"
+    ),
+
 ]
