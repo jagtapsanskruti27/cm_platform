@@ -10,10 +10,7 @@ from post.models import Post
 
 
 def home(request):
-    if request.user.is_authenticated:
-        return redirect('/feed/')
-    return render(request, 'home.html')
-
+    return render(request, "home.html")
 
 def register_view(request):
     if request.method == "POST":
@@ -40,9 +37,16 @@ def register_view(request):
 
 
 def login_view(request):
+
+    if request.user.is_authenticated:
+        if request.user.is_staff:
+            return redirect("admin_dashboard")
+        return redirect("feed")
+
     if request.method == "POST":
-        username = request.POST['username']
-        password = request.POST['password']
+
+        username = request.POST.get("username")
+        password = request.POST.get("password")
 
         user = authenticate(
             request,
@@ -50,16 +54,76 @@ def login_view(request):
             password=password
         )
 
-        if user:
+        if user is not None:
+
+            if user.is_staff:
+                return render(
+                    request,
+                    "login.html",
+                    {
+                        "error": "Please use the Admin Login page."
+                    }
+                )
+
             login(request, user)
-            return redirect('/feed/')
-        else:
-            return render(request, 'login.html', {
-                'error': 'Invalid Username or Password'
-            })
+            return redirect("feed")
 
-    return render(request, 'login.html')
+        return render(
+            request,
+            "login.html",
+            {
+                "error": "Invalid username or password."
+            }
+        )
 
+    return render(request, "login.html")
+
+
+def admin_login_view(request):
+
+    if request.user.is_authenticated:
+
+        if request.user.is_staff:
+            return redirect("admin_dashboard")
+
+        return redirect("feed")
+
+    if request.method == "POST":
+
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        user = authenticate(
+            request,
+            username=username,
+            password=password
+        )
+
+        if user is None:
+
+            return render(
+                request,
+                "admin_login.html",
+                {
+                    "error": "Invalid username or password."
+                }
+            )
+
+        if not user.is_staff:
+
+            return render(
+                request,
+                "admin_login.html",
+                {
+                    "error": "You are not an administrator."
+                }
+            )
+
+        login(request, user)
+
+        return redirect("admin_dashboard")
+
+    return render(request, "admin_login.html")
 
 def profile_view(request):
     if request.user.is_authenticated:
@@ -134,3 +198,29 @@ def follow_user(request, user_id):
         )
 
     return redirect('/profile/')    
+
+
+
+
+
+
+# @login_required
+# def dashboard(request):
+
+#     post_count = Post.objects.filter(user=request.user).count()
+
+#     followers_count = Follow.objects.filter(
+#         following=request.user
+#     ).count()
+
+#     following_count = Follow.objects.filter(
+#         follower=request.user
+#     ).count()
+
+#     context = {
+#         'post_count': post_count,
+#         'followers_count': followers_count,
+#         'following_count': following_count,
+#     }
+
+#     return render(request, 'analytics/dashboard.html', context)

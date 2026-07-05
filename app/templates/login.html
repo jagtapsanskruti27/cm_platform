@@ -190,7 +190,16 @@
             </div>
         </div>
 
-        <h2 class="auth-heading anim-2">Welcome back</h2>
+        <h2 class="auth-heading anim-2">User Login</h2>
+        <p>
+
+Administrator?
+
+<a href="{% url 'admin_login' %}">
+Login here →
+</a>
+
+</p>
         <p class="auth-sub anim-2">Don't have an account? <a href="/register/">Sign up free →</a></p>
 
         <form method="POST" class="anim-3">
@@ -204,7 +213,9 @@
             <div class="form-group">
                 <label>Password</label>
                 <input type="password" name="password" placeholder="••••••••" autocomplete="current-password">
-                <div class="forgot-link"><a href="#">Forgot password?</a></div>
+                <div class="forgot-link"><a href="{% url 'password_reset' %}">
+    Forgot Password?
+</a></div>
             </div>
 
             {% if error %}

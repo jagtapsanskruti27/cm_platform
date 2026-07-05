@@ -111,7 +111,7 @@
         <h3>{{ event.title }}</h3>
         <p><strong>Description:</strong> {{ event.description }}</p>
         <p><strong>Location:</strong> {{ event.location }}</p>
-        <p><strong>Date:</strong> {{ event.event_date }}</p>
+        <p><strong>Date:</strong> {{ event.start_datetime }}</p>
         <div class="event-actions">
             <a class="join-btn" href="{% url 'join_event' event.id %}">Join Event</a>
             <a class="cancel-btn" href="{% url 'delete_event' event.id %}">Cancel Event</a>

@@ -1,0 +1,241 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    .auth-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        min-height: calc(100vh - 70px);
+    }
+
+    .auth-form-side {
+        padding: 80px 70px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: var(--bg);
+        border-right: 1px solid var(--border);
+    }
+
+    .auth-heading {
+        font-family: 'Syne', sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .auth-sub {
+        color: var(--muted);
+        margin-bottom: 35px;
+    }
+
+    .auth-sub a {
+        color: var(--accent);
+        text-decoration: none;
+    }
+
+    .auth-sub a:hover {
+        text-decoration: underline;
+    }
+
+    .forgot-link {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 6px;
+    }
+
+    .forgot-link a {
+        color: var(--muted);
+        font-size: .8rem;
+        text-decoration: none;
+    }
+
+    .forgot-link a:hover {
+        color: var(--accent);
+    }
+
+    .auth-panel {
+        background: linear-gradient(145deg,#0d1321,#111827);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 80px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auth-panel::before{
+        content:'';
+        position:absolute;
+        width:450px;
+        height:450px;
+        right:-100px;
+        top:-100px;
+        background:radial-gradient(circle,rgba(162,89,255,.15),transparent 70%);
+    }
+
+    .panel-headline{
+        font-family:'Syne',sans-serif;
+        font-size:2.5rem;
+        line-height:1.1;
+        font-weight:800;
+        margin-bottom:20px;
+    }
+
+    .panel-headline span{
+        background:linear-gradient(135deg,var(--accent),var(--accent2));
+        -webkit-background-clip:text;
+        -webkit-text-fill-color:transparent;
+    }
+
+    .panel-sub{
+        color:var(--muted);
+        line-height:1.8;
+        max-width:340px;
+        margin-bottom:40px;
+    }
+
+    .security-box{
+        border:1px solid var(--border);
+        background:var(--surface);
+        border-radius:14px;
+        padding:20px;
+        width:100%;
+        max-width:360px;
+    }
+
+    .security-box h4{
+        margin-bottom:15px;
+    }
+
+    .security-box ul{
+        padding-left:20px;
+        color:var(--muted);
+        line-height:2;
+    }
+</style>
+
+<div class="auth-layout">
+
+    <!-- LEFT SIDE -->
+
+    <div class="auth-form-side">
+
+        <div style="margin-bottom:40px;">
+            <div style="display:flex;align-items:center;gap:10px;font-family:'Syne';font-size:1.3rem;font-weight:800;">
+                🛡 Nexus Admin
+            </div>
+        </div>
+
+        <h2 class="auth-heading">
+            Administrator Login
+        </h2>
+
+        <p class="auth-sub">
+            Login as a community administrator.<br>
+
+            Not an admin?
+
+            <a href="{% url 'login' %}">
+                User Login →
+            </a>
+
+        </p>
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <div class="form-group">
+
+                <label>Username</label>
+
+                <input
+                    type="text"
+                    name="username"
+                    placeholder="Admin Username"
+                    required>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>Password</label>
+
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="••••••••"
+                    required>
+
+                <div class="forgot-link">
+
+                    <a href="{% url 'password_reset' %}">
+                        Forgot Password?
+                    </a>
+
+                </div>
+
+            </div>
+
+            {% if error %}
+            <div class="alert alert-error">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+                style="margin-top:10px;width:100%;">
+
+                Admin Login →
+
+            </button>
+
+        </form>
+
+    </div>
+
+    <!-- RIGHT SIDE -->
+
+    <div class="auth-panel">
+
+        <h2 class="panel-headline">
+
+            Welcome to the
+            <span>Admin Portal</span>
+
+        </h2>
+
+        <p class="panel-sub">
+
+            Manage users, posts, reports,
+            events, analytics, notifications
+            and the entire Nexus community
+            from one secure dashboard.
+
+        </p>
+
+        <div class="security-box">
+
+            <h4>Administrator Access</h4>
+
+            <ul>
+                <li>✔ User Management</li>
+                <li>✔ Community Analytics</li>
+                <li>✔ Event Management</li>
+                <li>✔ Reports & Moderation</li>
+                <li>✔ Notifications</li>
+                <li>✔ System Monitoring</li>
+            </ul>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

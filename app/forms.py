@@ -7,7 +7,33 @@ class ProfileForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ['bio', 'profile_picture']
+        fields = [
+
+            "profile_picture",
+
+            "cover_photo",
+
+            "profession",
+
+            "bio",
+
+            "about",
+
+            "location",
+
+            "education",
+
+            "skills",
+
+            "website",
+
+            "github",
+
+            "linkedin",
+
+            "twitter",
+
+        ]
 
     def clean_profile_picture(self):
         image = self.cleaned_data.get('profile_picture')

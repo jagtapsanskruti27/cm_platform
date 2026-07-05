@@ -11,6 +11,11 @@ from django.core.paginator import Paginator
 
 @login_required
 def feed(request):
+
+    # Prevent admins from accessing the user feed
+    if request.user.is_staff or request.user.is_superuser:
+        return redirect("admin_dashboard")
+
     posts_list = Post.objects.all().order_by('-id')
 
     paginator = Paginator(posts_list, 5)
@@ -19,23 +24,26 @@ def feed(request):
 
     posts = paginator.get_page(page_number)
 
-    events = Event.objects.all().order_by('event_date')[:3]
+    events = Event.objects.all().order_by('start_datetime')[:3]
+
     notifications = Notification.objects.filter(
-    user=request.user,
-    is_read=False
-).order_by('-created_at')
+        user=request.user,
+        is_read=False
+    ).order_by('-created_at')
 
     query = request.GET.get('q', '').strip()
+
     users = []
     searched_posts = []
 
-    
     if query:
-        users = User.objects.filter(username__icontains=query)
+        users = User.objects.filter(
+            username__icontains=query
+        )
+
         searched_posts = Post.objects.filter(
-        caption__icontains=query
-    )
-        
+            caption__icontains=query
+        )
 
     return render(request, 'feed.html', {
         'posts': posts,
@@ -176,3 +184,5 @@ def read_notification(request, id):
     notification.save()
 
     return redirect('/feed/')
+
+
