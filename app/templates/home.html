@@ -1,440 +1,268 @@
 {% extends 'index.html' %}
-
 {% block content %}
-
 <style>
-    /* ── HERO ── */
-    .hero {
-        position: relative;
-        min-height: calc(100vh - 70px);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        padding: 80px 40px;
-        overflow: hidden;
-    }
+/* ── HERO ── */
+.hero {
+    min-height: calc(100vh - 60px);
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    text-align: center; padding: 60px 20px 80px;
+    position: relative; overflow: hidden;
+}
+.hero-glow-1 {
+    position: absolute; top: -80px; left: 50%;
+    transform: translateX(-50%);
+    width: 500px; height: 500px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,58,237,0.14) 0%, transparent 65%);
+    pointer-events: none;
+}
+.hero-glow-2 {
+    position: absolute; bottom: -60px; right: 5%;
+    width: 360px; height: 360px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(236,72,153,0.1) 0%, transparent 65%);
+    pointer-events: none;
+}
+.hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 16px; border-radius: 99px;
+    background: rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.3);
+    font-size: 0.78rem; font-weight: 700; color: var(--violet2);
+    letter-spacing: 0.05em; margin-bottom: 28px;
+    animation: fadeUp 0.5s ease both;
+}
+.hero-badge-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--violet2); animation: pulse 1.8s ease infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.5;transform:scale(0.8);} }
 
-    /* Glow blobs */
-    .hero::before {
-        content: '';
-        position: absolute;
-        top: -120px; left: 50%;
-        transform: translateX(-50%);
-        width: 700px; height: 700px;
-        background: radial-gradient(circle, rgba(79,140,255,0.12) 0%, transparent 65%);
-        pointer-events: none;
-    }
+.hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.5rem, 9vw, 5rem);
+    font-weight: 800; line-height: 1.05;
+    letter-spacing: -0.04em; max-width: 780px;
+    margin-bottom: 22px;
+    animation: fadeUp 0.5s 0.08s ease both;
+}
+.hero h1 .grad {
+    background: linear-gradient(135deg, #a78bfa 0%, #ec4899 50%, #f59e0b 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hero p {
+    font-size: 1.05rem; color: var(--muted2); max-width: 480px;
+    line-height: 1.7; margin-bottom: 36px; font-weight: 400;
+    animation: fadeUp 0.5s 0.16s ease both;
+}
+.hero-actions {
+    display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+    margin-bottom: 60px; animation: fadeUp 0.5s 0.24s ease both;
+}
+.hero-actions .btn { padding: 14px 30px; font-size: 0.95rem; }
 
-    .hero::after {
-        content: '';
-        position: absolute;
-        bottom: -80px; right: 10%;
-        width: 400px; height: 400px;
-        background: radial-gradient(circle, rgba(162,89,255,0.1) 0%, transparent 65%);
-        pointer-events: none;
-    }
+/* STATS */
+.stats-row {
+    display: flex; gap: 0; border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden; max-width: 560px; width: 100%;
+    animation: fadeUp 0.5s 0.32s ease both;
+}
+.stat { flex: 1; background: var(--surface); padding: 20px 16px; text-align: center; border-right: 1px solid var(--border); }
+.stat:last-child { border-right: none; }
+.stat-num {
+    font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800;
+    background: var(--grad-main); -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; background-clip: text;
+}
+.stat-label { font-size: 0.7rem; color: var(--muted); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin-top: 3px; }
 
-    .hero-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 7px 18px;
-        background: rgba(79,140,255,0.08);
-        border: 1px solid rgba(79,140,255,0.2);
-        border-radius: 99px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        color: var(--accent);
-        letter-spacing: 0.04em;
-        margin-bottom: 30px;
-        animation: fadeIn 0.5s ease both;
-    }
+/* ── SCROLLING FEATURES ── */
+.marquee-wrap {
+    padding: 48px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    overflow: hidden; margin-bottom: 80px;
+}
+.marquee-label { text-align: center; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 24px; }
+.marquee-track { display: flex; gap: 12px; animation: marquee 24s linear infinite; width: max-content; }
+@keyframes marquee { from{transform:translateX(0);} to{transform:translateX(-50%);} }
+.m-pill {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 18px; background: var(--surface);
+    border: 1px solid var(--border2); border-radius: 99px;
+    white-space: nowrap; font-size: 0.82rem; font-weight: 600; color: var(--text2);
+}
+.m-pill-dot { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
 
-    .hero-badge-dot {
-        width: 7px; height: 7px;
-        border-radius: 50%;
-        background: var(--accent);
-        animation: pulse 1.8s ease infinite;
-    }
+/* ── FEATURES GRID ── */
+.features { max-width: 1080px; margin: 0 auto; padding: 80px 20px; }
+.section-label {
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--violet2); margin-bottom: 10px;
+}
+.section-title {
+    font-family: 'Syne', sans-serif; font-size: clamp(1.7rem, 4vw, 2.6rem);
+    font-weight: 700; letter-spacing: -0.02em; margin-bottom: 50px;
+    max-width: 420px; line-height: 1.2;
+}
+.features-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;
+}
+.feat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 28px; transition: all 0.3s; position: relative; overflow: hidden;
+}
+.feat-card:hover {
+    border-color: var(--violet); transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+}
+.feat-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(124,58,237,0.05), transparent);
+    opacity: 0; transition: opacity 0.3s;
+}
+.feat-card:hover::before { opacity: 1; }
+.feat-icon {
+    width: 48px; height: 48px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; margin-bottom: 18px;
+}
+.feat-icon.v { background: rgba(124,58,237,0.15); }
+.feat-icon.p { background: rgba(236,72,153,0.15); }
+.feat-icon.c { background: rgba(6,182,212,0.15); }
+.feat-icon.g { background: rgba(245,158,11,0.15); }
+.feat-icon.e { background: rgba(16,185,129,0.15); }
+.feat-icon.r { background: rgba(239,68,68,0.15); }
+.feat-card h3 {
+    font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
+    margin-bottom: 8px; letter-spacing: -0.01em;
+}
+.feat-card p { font-size: 0.85rem; color: var(--muted2); line-height: 1.6; }
+.feat-new { position: absolute; top: 14px; right: 14px; }
 
-    .hero h1 {
-        font-family: 'Syne', sans-serif;
-        font-size: clamp(2.8rem, 7vw, 5.5rem);
-        font-weight: 800;
-        line-height: 1.05;
-        letter-spacing: -0.03em;
-        max-width: 820px;
-        margin-bottom: 24px;
-    }
+/* ── CTA ── */
+.cta-section {
+    margin: 0 20px 80px; padding: 60px 40px; border-radius: 24px; text-align: center;
+    background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(236,72,153,0.08));
+    border: 1px solid rgba(124,58,237,0.2); position: relative; overflow: hidden;
+}
+.cta-section::before {
+    content: ''; position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%237c3aed' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+}
+.cta-section h2 { font-family: 'Syne', sans-serif; font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 800; margin-bottom: 12px; }
+.cta-section p { color: var(--muted2); margin-bottom: 28px; max-width: 400px; margin-left: auto; margin-right: auto; }
 
-    .hero h1 span {
-        background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .hero p {
-        font-size: 1.15rem;
-        color: var(--muted);
-        max-width: 520px;
-        line-height: 1.7;
-        margin-bottom: 40px;
-        font-weight: 300;
-    }
-
-    .hero-actions {
-        display: flex;
-        gap: 14px;
-        flex-wrap: wrap;
-        justify-content: center;
-        margin-bottom: 80px;
-    }
-
-    .hero-actions .btn {
-        padding: 15px 34px;
-        font-size: 1rem;
-    }
-
-    /* ── STATS STRIP ── */
-    .stats-strip {
-        display: flex;
-        gap: 1px;
-        background: var(--border);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        overflow: hidden;
-        max-width: 680px;
-        width: 100%;
-    }
-
-    .stat {
-        flex: 1;
-        background: var(--surface);
-        padding: 22px 24px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 4px;
-    }
-
-    .stat-number {
-        font-family: 'Syne', sans-serif;
-        font-size: 1.8rem;
-        font-weight: 800;
-        background: linear-gradient(135deg, var(--text), var(--muted));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .stat-label {
-        font-size: 0.75rem;
-        color: var(--muted);
-        font-weight: 500;
-        letter-spacing: 0.04em;
-    }
-
-    /* ── FEATURES ── */
-    .features {
-        padding: 100px 40px;
-        max-width: 1100px;
-        margin: 0 auto;
-    }
-
-    .section-label {
-        font-size: 0.75rem;
-        font-weight: 700;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: var(--accent);
-        margin-bottom: 12px;
-    }
-
-    .section-title {
-        font-family: 'Syne', sans-serif;
-        font-size: clamp(1.8rem, 4vw, 2.8rem);
-        font-weight: 700;
-        letter-spacing: -0.02em;
-        margin-bottom: 60px;
-        max-width: 440px;
-        line-height: 1.2;
-    }
-
-    .features-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-    }
-
-    .feature-card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 32px;
-        transition: all 0.3s;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .feature-card::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(135deg, rgba(79,140,255,0.04), transparent);
-        opacity: 0;
-        transition: opacity 0.3s;
-    }
-
-    .feature-card:hover {
-        border-color: rgba(79,140,255,0.35);
-        transform: translateY(-4px);
-        box-shadow: 0 16px 40px rgba(0,0,0,0.3);
-    }
-
-    .feature-card:hover::before { opacity: 1; }
-
-    .feature-icon {
-        width: 46px; height: 46px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.3rem;
-        margin-bottom: 20px;
-    }
-
-    .feature-icon.blue   { background: rgba(79,140,255,0.12); }
-    .feature-icon.purple { background: rgba(162,89,255,0.12); }
-    .feature-icon.gold   { background: rgba(245,200,66,0.12); }
-    .feature-icon.green  { background: rgba(61,220,172,0.12); }
-    .feature-icon.pink   { background: rgba(255,90,110,0.12); }
-    .feature-icon.teal   { background: rgba(61,220,172,0.12); }
-
-    .feature-card h3 {
-        font-family: 'Syne', sans-serif;
-        font-size: 1.05rem;
-        font-weight: 700;
-        margin-bottom: 10px;
-        letter-spacing: -0.01em;
-    }
-
-    .feature-card p {
-        font-size: 0.875rem;
-        color: var(--muted);
-        line-height: 1.65;
-    }
-
-    /* ── CTA BAND ── */
-    .cta-band {
-        margin: 0 40px 100px;
-        background: linear-gradient(135deg, rgba(79,140,255,0.08), rgba(162,89,255,0.08));
-        border: 1px solid rgba(79,140,255,0.2);
-        border-radius: 20px;
-        padding: 60px;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .cta-band::before {
-        content: 'NEXUS';
-        position: absolute;
-        font-family: 'Syne', sans-serif;
-        font-size: 12rem;
-        font-weight: 800;
-        color: rgba(255,255,255,0.02);
-        letter-spacing: -0.04em;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%,-50%);
-        pointer-events: none;
-        white-space: nowrap;
-    }
-
-    .cta-band h2 {
-        font-family: 'Syne', sans-serif;
-        font-size: 2.2rem;
-        font-weight: 700;
-        letter-spacing: -0.02em;
-        margin-bottom: 14px;
-    }
-
-    .cta-band p {
-        color: var(--muted);
-        margin-bottom: 30px;
-        font-size: 1rem;
-    }
-
-    /* ── MEMBERS MARQUEE ── */
-    .marquee-section {
-        padding: 60px 0;
-        overflow: hidden;
-        border-top: 1px solid var(--border);
-        border-bottom: 1px solid var(--border);
-        margin-bottom: 80px;
-    }
-
-    .marquee-label {
-        text-align: center;
-        font-size: 0.75rem;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: var(--muted);
-        margin-bottom: 28px;
-    }
-
-    .marquee-track {
-        display: flex;
-        gap: 16px;
-        animation: marquee 22s linear infinite;
-        width: max-content;
-    }
-
-    @keyframes marquee {
-        from { transform: translateX(0); }
-        to   { transform: translateX(-50%); }
-    }
-
-    .member-pill {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 10px 20px;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 99px;
-        white-space: nowrap;
-        font-size: 0.875rem;
-        font-weight: 500;
-    }
-
-    .member-avatar {
-        width: 28px; height: 28px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.8rem;
-        font-weight: 700;
-        flex-shrink: 0;
-    }
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
 </style>
 
 <!-- HERO -->
 <section class="hero">
-    <div class="hero-badge anim-1">
+    <div class="hero-glow-1"></div>
+    <div class="hero-glow-2"></div>
+
+    <div class="hero-badge">
         <span class="hero-badge-dot"></span>
-        New members joining every day
+        🎓 Built exclusively for college students
     </div>
 
-    <h1 class="anim-2">
-        Connect with your<br><span>community</span>
-    </h1>
+    <h1>Your Campus Life,<br><span class="grad">Amplified.</span></h1>
 
-    <p class="anim-3">
-        Nexus is where curious people gather to share ideas, collaborate on projects, and build meaningful connections.
-    </p>
+    <p>Connect with batchmates, discover events, join clubs, form study groups — everything college in one place.</p>
 
-    <div class="hero-actions anim-4">
-        <a href="/register/" class="btn btn-primary">Start for free →</a>
+    <div class="hero-actions">
+        <a href="/register/" class="btn btn-primary">Join Free — It's For Students →</a>
         <a href="/login/" class="btn btn-ghost">Sign in</a>
     </div>
 
-    <div class="stats-strip anim-5">
-        <div class="stat">
-            <span class="stat-number">12K+</span>
-            <span class="stat-label">Members</span>
-        </div>
-        <div class="stat">
-            <span class="stat-number">840</span>
-            <span class="stat-label">Posts today</span>
-        </div>
-        <div class="stat">
-            <span class="stat-number">98%</span>
-            <span class="stat-label">Satisfaction</span>
-        </div>
-        <div class="stat">
-            <span class="stat-number">47</span>
-            <span class="stat-label">Topics</span>
-        </div>
+    <div class="stats-row">
+        <div class="stat"><div class="stat-num">12K+</div><div class="stat-label">Students</div></div>
+        <div class="stat"><div class="stat-num">840</div><div class="stat-label">Posts Today</div></div>
+        <div class="stat"><div class="stat-num">120</div><div class="stat-label">Clubs</div></div>
+        <div class="stat"><div class="stat-num">47</div><div class="stat-label">Colleges</div></div>
     </div>
 </section>
 
 <!-- MARQUEE -->
-<div class="marquee-section">
-    <p class="marquee-label">Members from around the world</p>
+<div class="marquee-wrap">
+    <p class="marquee-label">Students across campuses</p>
     <div class="marquee-track">
-        <div class="member-pill"><div class="member-avatar" style="background:rgba(79,140,255,0.2);color:var(--accent);">A</div> Alex Chen</div>
-        <div class="member-pill"><div class="member-avatar" style="background:rgba(162,89,255,0.2);color:var(--accent2);">S</div> Sara Müller</div>
-        <div class="member-pill"><div class="member-avatar" style="background:rgba(245,200,66,0.2);color:var(--gold);">J</div> James K.</div>
-        <div class="member-pill"><div class="member-avatar" style="background:rgba(61,220,172,0.2);color:var(--success);">P</div> Priya Nair</div>
-        <div class="member-pill"><div class="member-avatar" style="background:rgba(255,90,110,0.2);color:var(--danger);">L</div> Luca Romano</div>
-        <div class="member-pill"><div class="member-avatar" style="background:rgba(79,140,255,0.2);color:var(--accent);">M</div> Maya Osei</div>
-        <div class="member-pill"><div class="member-avatar" style="background:rgba(162,89,255,0.2);color:var(--accent2);">R</div> Raj Patel</div>
-        <div class="member-pill"><div class="member-avatar" style="background:rgba(245,200,66,0.2);color:var(--gold);">E</div> Emma Liu</div>
-        <div class="member-pill"><div class="member-avatar" style="background:rgba(61,220,172,0.2);color:var(--success);">K</div> Kenji Tanaka</div>
-        <div class="member-pill"><div class="member-avatar" style="background:rgba(255,90,110,0.2);color:var(--danger);">F</div> Fatima Al-Z</div>
-        <!-- duplicate for seamless loop -->
-        <div class="member-pill"><div class="member-avatar" style="background:rgba(79,140,255,0.2);color:var(--accent);">A</div> Alex Chen</div>
-        <div class="member-pill"><div class="member-avatar" style="background:rgba(162,89,255,0.2);color:var(--accent2);">S</div> Sara Müller</div>
-        <div class="member-pill"><div class="member-avatar" style="background:rgba(245,200,66,0.2);color:var(--gold);">J</div> James K.</div>
-        <div class="member-pill"><div class="member-avatar" style="background:rgba(61,220,172,0.2);color:var(--success);">P</div> Priya Nair</div>
-        <div class="member-pill"><div class="member-avatar" style="background:rgba(255,90,110,0.2);color:var(--danger);">L</div> Luca Romano</div>
-        <div class="member-pill"><div class="member-avatar" style="background:rgba(79,140,255,0.2);color:var(--accent);">M</div> Maya Osei</div>
-        <div class="member-pill"><div class="member-avatar" style="background:rgba(162,89,255,0.2);color:var(--accent2);">R</div> Raj Patel</div>
-        <div class="member-pill"><div class="member-avatar" style="background:rgba(245,200,66,0.2);color:var(--gold);">E</div> Emma Liu</div>
-        <div class="member-pill"><div class="member-avatar" style="background:rgba(61,220,172,0.2);color:var(--success);">K</div> Kenji Tanaka</div>
-        <div class="member-pill"><div class="member-avatar" style="background:rgba(255,90,110,0.2);color:var(--danger);">F</div> Fatima Al-Z</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(124,58,237,0.2);">🟣</div>Arjun M.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(236,72,153,0.2);">🩷</div>Priya N.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(6,182,212,0.2);">🩵</div>Rohan K.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(245,158,11,0.2);">🌟</div>Sneha V.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(124,58,237,0.2);">🟣</div>Vikram S.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(16,185,129,0.2);">💚</div>Anjali R.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(236,72,153,0.2);">🩷</div>Harsh P.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(6,182,212,0.2);">🩵</div>Pooja D.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(245,158,11,0.2);">🌟</div>Dev T.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(124,58,237,0.2);">🟣</div>Kavya L.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(236,72,153,0.2);">🩷</div>Nikhil A.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(6,182,212,0.2);">🩵</div>Shreya G.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(16,185,129,0.2);">💚</div>Rahul B.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(245,158,11,0.2);">🌟</div>Meghna C.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(124,58,237,0.2);">🟣</div>Aarav J.</div>
+        <!-- duplicate set for seamless infinite scroll -->
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(236,72,153,0.2);">🩷</div>Arjun M.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(124,58,237,0.2);">🟣</div>Priya N.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(6,182,212,0.2);">🩵</div>Rohan K.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(245,158,11,0.2);">🌟</div>Sneha V.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(16,185,129,0.2);">💚</div>Vikram S.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(236,72,153,0.2);">🩷</div>Anjali R.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(124,58,237,0.2);">🟣</div>Harsh P.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(6,182,212,0.2);">🩵</div>Pooja D.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(245,158,11,0.2);">🌟</div>Dev T.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(124,58,237,0.2);">🟣</div>Kavya L.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(236,72,153,0.2);">🩷</div>Nikhil A.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(6,182,212,0.2);">🩵</div>Shreya G.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(16,185,129,0.2);">💚</div>Rahul B.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(245,158,11,0.2);">🌟</div>Meghna C.</div>
+        <div class="m-pill"><div class="m-pill-dot" style="background:rgba(124,58,237,0.2);">🟣</div>Aarav J.</div>
     </div>
 </div>
 
 <!-- FEATURES -->
 <section class="features">
-    <div class="section-label">Why Nexus</div>
-    <h2 class="section-title">Everything your community needs</h2>
+    <div class="section-label">Why CampusVibe</div>
+    <h2 class="section-title">Everything your college life needs</h2>
 
     <div class="features-grid">
-        <div class="feature-card anim-1">
-            <div class="feature-icon blue">💬</div>
-            <h3>Rich Discussions</h3>
-            <p>Threaded conversations with rich formatting, reactions, and media support.</p>
+        <div class="feat-card">
+            <div class="feat-icon v">📸</div>
+            <h3>Campus Feed</h3>
+            <p>Share moments, memes, announcements and achievements with your whole campus — not just followers.</p>
         </div>
-        <div class="feature-card anim-2">
-            <div class="feature-icon purple">🔒</div>
-            <h3>Secure & Private</h3>
-            <p>Your data stays yours. End-to-end security with granular privacy controls.</p>
+        <div class="feat-card">
+            <div class="feat-icon p">🎉</div>
+            <h3>Events & Fests</h3>
+            <p>Never miss a cultural fest, tech hackathon or sports meet again. RSVP, remind, attend.</p>
         </div>
-        <div class="feature-card anim-3">
-            <div class="feature-icon gold">⚡</div>
-            <h3>Real-time Updates</h3>
-            <p>Live notifications so you're always in the loop without refreshing.</p>
+        <div class="feat-card">
+            <div class="feat-icon c">📚</div>
+            <h3>Study Groups</h3>
+            <p>Find batch-mates for group study, share notes, schedule sessions and ace your exams together.</p>
         </div>
-        <div class="feature-card anim-4">
-            <div class="feature-icon green">🌐</div>
-            <h3>Global Network</h3>
-            <p>Connect with members from 80+ countries who share your interests.</p>
+        <div class="feat-card">
+            <div class="feat-icon g">🏆</div>
+            <h3>Clubs & Societies</h3>
+            <p>Discover and join your college's clubs — coding, drama, music, NSS — all in one hub.</p>
         </div>
-        <div class="feature-card anim-5">
-            <div class="feature-icon pink">🎯</div>
-            <h3>Smart Discovery</h3>
-            <p>Find the right people and content through our intelligent recommendation engine.</p>
+        <div class="feat-card">
+            <div class="feat-icon e">💼</div>
+            <h3>Placement Corner</h3>
+            <p>Share internship experiences, referrals, prep tips and celebrate placements with your peers.</p>
+            <span class="feat-new"><span class="badge badge-green">New</span></span>
         </div>
-        <div class="feature-card">
-            <div class="feature-icon teal">📊</div>
-            <h3>Member Analytics</h3>
-            <p>Track your engagement, reach, and impact across the community.</p>
+        <div class="feat-card">
+            <div class="feat-icon r">🔒</div>
+            <h3>College-Verified Only</h3>
+            <p>Admin-approved sign-ups mean your campus stays safe, genuine and spam-free.</p>
         </div>
     </div>
 </section>
 
-<!-- CTA BAND -->
-<div class="cta-band">
-    <h2>Ready to join the conversation?</h2>
-    <p>Free forever. No credit card required.</p>
-    <a href="/register/" class="btn btn-primary" style="display:inline-flex;width:auto;">Create your account →</a>
+<!-- CTA -->
+<div class="cta-section">
+    <h2>Ready to vibe with your campus? 🎓</h2>
+    <p>Join thousands of students already connecting, sharing, and growing together.</p>
+    <a href="/register/" class="btn btn-primary" style="display:inline-flex;width:auto;padding:14px 32px;">Create Free Account →</a>
 </div>
 
 {% endblock %}

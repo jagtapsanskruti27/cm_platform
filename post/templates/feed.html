@@ -1,659 +1,422 @@
 {% extends 'index.html' %}
-
 {% block content %}
-
 <style>
-    .feed-page {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 60px 20px 100px;
-    }
+.feed-wrap { max-width: 480px; margin: 0 auto; padding: 0 0 20px; }
 
-    .feed-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 32px;
-    }
+/* ── STORIES ── */
+.stories-bar {
+    display: flex; gap: 12px; padding: 14px 16px;
+    overflow-x: auto; scrollbar-width: none;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+}
+.stories-bar::-webkit-scrollbar { display: none; }
+.story-item { display: flex; flex-direction: column; align-items: center; gap: 5px; flex-shrink: 0; cursor: pointer; }
+.story-ring { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b, #ec4899, #7c3aed); padding: 2.5px; transition: transform 0.2s; }
+.story-ring:hover { transform: scale(1.06); }
+.story-ring.seen { background: var(--border2); }
+.story-ring-inner { width: 100%; height: 100%; border-radius: 50%; background: var(--surface); display: flex; align-items: center; justify-content: center; padding: 2px; }
+.story-avatar { width: 100%; height: 100%; border-radius: 50%; background: var(--grad-main); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; color: white; }
+.story-name { font-size: 0.62rem; font-weight: 600; color: var(--text2); text-align: center; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-    .dashboard-panels {
-        display: grid;
-        grid-template-columns: 1.5fr 1fr;
-        gap: 24px;
-        margin-bottom: 32px;
-    }
+/* ── CAMPUS CHIPS ── */
+.campus-chips { display: flex; gap: 8px; padding: 10px 16px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--border); }
+.campus-chips::-webkit-scrollbar { display: none; }
+.chip { padding: 5px 13px; border-radius: 99px; border: 1.5px solid var(--border2); background: var(--surface); color: var(--muted2); font-size: 0.76rem; font-weight: 600; white-space: nowrap; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
+.chip:hover, .chip.active { border-color: var(--violet); color: var(--violet2); background: rgba(124,58,237,0.1); }
 
-    .dashboard-panel {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 24px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    }
+/* ── NOTIFICATIONS ── */
+.notif-strip { margin: 12px 16px 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+.notif-strip-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; cursor: pointer; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+.notif-strip-header.open { border-bottom-color: var(--border); }
+.notif-strip-title { font-weight: 700; font-size: 0.88rem; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.notif-count-badge { padding: 2px 7px; border-radius: 99px; font-size: 0.65rem; font-weight: 800; background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.25); color: var(--violet2); }
+.notif-toggle-icon { font-size: 0.7rem; color: var(--muted); transition: transform 0.2s; }
+.notif-toggle-icon.open { transform: rotate(180deg); }
+.notif-body { padding: 4px 8px 8px; }
+.notif-item { display: flex; align-items: flex-start; gap: 10px; padding: 9px 8px; border-radius: 10px; transition: background 0.15s; }
+.notif-item:hover { background: var(--surface2); }
+.notif-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--violet); flex-shrink: 0; margin-top: 6px; }
+.notif-text { font-size: 0.8rem; color: var(--text2); line-height: 1.4; flex: 1; }
+.notif-time { font-size: 0.68rem; color: var(--muted); white-space: nowrap; }
+.notif-mark { font-size: 0.7rem; color: var(--violet2); text-decoration: none; margin-top: 3px; display: block; }
+.notif-empty { padding: 14px 16px; color: var(--muted); font-size: 0.85rem; text-align: center; }
 
-    .panel-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 18px;
-    }
+/* ── MSG BANNER ── */
+.msg-banner { margin: 10px 16px; padding: 11px 16px; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 12px; font-size: 0.85rem; color: #6ee7b7; font-weight: 500; transition: all 0.4s; }
+.msg-banner.hide { opacity: 0; transform: translateY(-8px); }
 
-    .panel-title {
-        font-family: 'Syne', sans-serif;
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: var(--text);
-    }
+/* ── SEARCH ── */
+.search-box { margin: 10px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; }
+.search-box h2 { font-size: 0.875rem; font-weight: 700; margin-bottom: 10px; color: var(--text2); }
+.s-result { display: flex; align-items: center; justify-content: space-between; padding: 9px 10px; border-radius: 10px; background: var(--surface2); margin-bottom: 6px; gap: 10px; }
+.s-result:last-child { margin-bottom: 0; }
+.s-result a { color: var(--text); font-weight: 600; text-decoration: none; font-size: 0.85rem; }
+.s-result a:hover { color: var(--violet2); }
 
-    .panel-link {
-        font-size: 0.9rem;
-        color: var(--accent);
-        text-decoration: none;
-    }
+/* ── POST CARD ── */
+.post-card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; margin: 10px 16px; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; }
+.post-card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.35); }
 
-    .panel-link:hover {
-        text-decoration: underline;
-    }
+.post-header { display: flex; align-items: center; gap: 10px; padding: 14px 14px 10px; }
+.post-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--grad-main); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 800; color: white; flex-shrink: 0; }
+.post-user-info { flex: 1; min-width: 0; }
+.post-username { font-weight: 700; font-size: 0.9rem; color: var(--text); }
+.post-meta-row { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+.post-header-btns { display: flex; gap: 5px; align-items: center; }
+.btn-follow { padding: 4px 10px; border-radius: 18px; font-size: 0.72rem; font-weight: 700; background: rgba(124,58,237,0.12); border: 1.5px solid rgba(124,58,237,0.35); color: var(--violet2); text-decoration: none; transition: all 0.2s; }
+.btn-follow:hover { background: rgba(124,58,237,0.22); }
+.btn-msg { padding: 4px 8px; border-radius: 18px; font-size: 0.72rem; font-weight: 700; background: rgba(6,182,212,0.1); border: 1.5px solid rgba(6,182,212,0.3); color: var(--cyan2); text-decoration: none; transition: all 0.2s; }
+.btn-msg:hover { background: rgba(6,182,212,0.2); }
 
-    .event-item,
-    .notification-item {
-        padding: 16px;
-        border-radius: var(--radius);
-        background: var(--surface2);
-        margin-bottom: 14px;
-    }
+.post-caption { padding: 0 14px 10px; font-size: 0.88rem; line-height: 1.6; color: var(--text2); }
+.post-img { width: 100%; max-height: 380px; object-fit: cover; display: block; }
 
-    .event-item:last-child,
-    .notification-item:last-child {
-        margin-bottom: 0;
-    }
+/* Actions */
+.post-actions { display: flex; align-items: center; padding: 8px 10px; border-top: 1px solid var(--border); gap: 2px; }
+.act-btn { display: inline-flex; align-items: center; gap: 5px; padding: 7px 9px; border-radius: 9px; border: none; background: none; color: var(--muted2); font-family: 'Space Grotesk', sans-serif; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.18s; text-decoration: none; }
+.act-btn:hover { color: var(--text); background: var(--surface2); }
+.act-btn.liked { color: var(--pink); }
+.act-btn.liked:hover { background: rgba(236,72,153,0.1); }
+.act-spacer { flex: 1; }
 
-    .event-name {
-        font-weight: 700;
-        margin-bottom: 6px;
-        color: var(--text);
-    }
+/* Comments */
+.comments-section { border-top: 1px solid var(--border); padding: 10px 14px 12px; }
+.comment-form { display: flex; gap: 8px; margin-bottom: 10px; align-items: center; }
+.c-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--grad-alt); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 800; color: white; flex-shrink: 0; }
+.comment-input { flex: 1; padding: 7px 12px; background: var(--surface2); border: 1.5px solid var(--border2); border-radius: 18px; color: var(--text); font-family: 'Space Grotesk', sans-serif; font-size: 0.83rem; outline: none; transition: all 0.2s; }
+.comment-input:focus { border-color: var(--violet); background: var(--surface3); }
+.comment-input::placeholder { color: var(--muted); }
+.comment-submit { padding: 7px 13px; background: var(--grad-main); border: none; border-radius: 18px; color: white; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
+.comment-submit:hover { transform: scale(1.05); }
+.comment { display: flex; gap: 8px; margin-bottom: 8px; padding: 8px 10px; background: var(--surface2); border-radius: 10px; }
+.comment-content { flex: 1; }
+.comment-username { font-weight: 700; font-size: 0.78rem; color: var(--text); margin-bottom: 2px; }
+.comment-text { font-size: 0.8rem; color: var(--muted2); line-height: 1.4; }
+.del-comment-btn { border: none; background: none; color: var(--muted); cursor: pointer; font-size: 0.72rem; opacity: 0.6; transition: opacity 0.2s; padding: 2px 4px; }
+.del-comment-btn:hover { opacity: 1; color: var(--red); }
 
-    .event-meta,
-    .notification-meta {
-        font-size: 0.9rem;
-        color: var(--muted);
-        line-height: 1.5;
-    }
+/* Empty + Pagination */
+.empty-state { text-align: center; padding: 60px 24px; color: var(--muted); }
+.empty-icon { font-size: 3.2rem; margin-bottom: 14px; }
+.empty-title { font-size: 1.05rem; font-weight: 700; color: var(--text2); margin-bottom: 8px; }
+.empty-sub { font-size: 0.85rem; margin-bottom: 20px; }
+.pagination { display: flex; justify-content: center; align-items: center; gap: 12px; padding: 20px 16px; }
+.page-btn { padding: 8px 18px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border2); color: var(--text2); text-decoration: none; font-weight: 600; font-size: 0.82rem; transition: all 0.2s; }
+.page-btn:hover { border-color: var(--violet); color: var(--violet2); }
+.page-info { font-size: 0.78rem; color: var(--muted); }
 
-    .no-items {
-        color: var(--muted);
-        font-size: 0.95rem;
-        padding: 16px;
-        text-align: center;
-        border-radius: var(--radius);
-        background: var(--surface2);
-    }
+/* Post card stagger via nth-child */
+.post-card { animation: fadeUp 0.4s ease both; }
+.post-card:nth-child(1) { animation-delay: 0ms; }
+.post-card:nth-child(2) { animation-delay: 80ms; }
+.post-card:nth-child(3) { animation-delay: 160ms; }
+.post-card:nth-child(4) { animation-delay: 240ms; }
+.post-card:nth-child(5) { animation-delay: 320ms; }
 
-    .feed-title {
-        font-family: 'Syne', sans-serif;
-        font-size: 2rem;
-        font-weight: 700;
-        background: linear-gradient(135deg, var(--accent), var(--accent2));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .create-post-btn {
-        padding: 12px 24px;
-        background: linear-gradient(135deg, var(--accent), var(--accent2));
-        border: none;
-        border-radius: var(--radius);
-        color: white;
-        font-family: 'DM Sans', sans-serif;
-        font-size: 0.95rem;
-        font-weight: 600;
-        text-decoration: none;
-        transition: transform 0.2s, box-shadow 0.2s;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .create-post-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(79, 140, 255, 0.3);
-        text-decoration: none;
-        color: white;
-    }
-
-    .post-card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 24px;
-        margin-bottom: 24px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .post-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    }
-
-    .post-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 16px;
-    }
-
-    .post-avatar {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, var(--accent), var(--accent2));
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: 'Syne', sans-serif;
-        font-size: 1.2rem;
-        font-weight: 800;
-        color: white;
-        flex-shrink: 0;
-    }
-
-    .post-user-info {
-        flex: 1;
-    }
-
-    .post-username {
-        font-family: 'Syne', sans-serif;
-        font-size: 1rem;
-        font-weight: 700;
-        color: var(--text);
-        margin-bottom: 2px;
-    }
-
-    .post-timestamp {
-        font-size: 0.8rem;
-        color: var(--muted);
-    }
-
-    .post-content {
-        margin-bottom: 16px;
-    }
-
-    .post-caption {
-        font-size: 1rem;
-        line-height: 1.6;
-        color: var(--text);
-        margin-bottom: 16px;
-    }
-
-    .post-image {
-        width: 100%;
-        border-radius: var(--radius);
-        margin-bottom: 16px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    }
-
-    .post-actions {
-        display: flex;
-        gap: 16px;
-        margin-bottom: 20px;
-        padding-top: 16px;
-        border-top: 1px solid var(--border);
-    }
-
-    .action-btn {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 8px 12px;
-        background: none;
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        color: var(--muted);
-        font-family: 'DM Sans', sans-serif;
-        font-size: 0.85rem;
-        cursor: pointer;
-        transition: all 0.2s;
-        text-decoration: none;
-    }
-
-    .action-btn:hover {
-        background: var(--surface2);
-        border-color: var(--accent);
-        color: var(--accent);
-        text-decoration: none;
-    }
-
-    .action-btn.liked {
-        background: rgba(255, 90, 110, 0.1);
-        border-color: var(--danger);
-        color: var(--danger);
-    }
-
-    .comments-section {
-        border-top: 1px solid var(--border);
-        padding-top: 20px;
-    }
-
-    .comments-title {
-        font-family: 'Syne', sans-serif;
-        font-size: 1rem;
-        font-weight: 600;
-        margin-bottom: 16px;
-        color: var(--text);
-    }
-
-    .comment-form {
-        display: flex;
-        gap: 12px;
-        margin-bottom: 20px;
-    }
-
-    .comment-input {
-        flex: 1;
-        padding: 12px 16px;
-        background: var(--surface2);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        color: var(--text);
-        font-family: 'DM Sans', sans-serif;
-        font-size: 0.9rem;
-    }
-
-    .comment-input:focus {
-        outline: none;
-        border-color: var(--accent);
-        box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.1);
-    }
-
-    .comment-input::placeholder {
-        color: var(--muted);
-    }
-
-    .comment-submit {
-        padding: 12px 20px;
-        background: var(--accent);
-        border: none;
-        border-radius: var(--radius);
-        color: white;
-        font-family: 'DM Sans', sans-serif;
-        font-size: 0.9rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background 0.2s;
-    }
-
-    .comment-submit:hover {
-        background: var(--accent2);
-    }
-
-    .comment {
-        display: flex;
-        gap: 12px;
-        margin-bottom: 16px;
-        padding: 12px;
-        background: var(--surface2);
-        border-radius: var(--radius);
-    }
-
-    .comment-avatar {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, var(--gold), var(--success));
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.8rem;
-        font-weight: 700;
-        color: white;
-        flex-shrink: 0;
-    }
-
-    .comment-content {
-        flex: 1;
-    }
-
-    .comment-username {
-        font-weight: 600;
-        color: var(--text);
-        margin-bottom: 4px;
-    }
-
-    .comment-text {
-        font-size: 0.9rem;
-        color: var(--muted);
-        line-height: 1.4;
-    }
-
-    .no-posts {
-        text-align: center;
-        padding: 60px 20px;
-        color: var(--muted);
-    }
-
-    .no-posts-icon {
-        font-size: 4rem;
-        margin-bottom: 16px;
-    }
-
-    .no-posts-text {
-        font-size: 1.1rem;
-        margin-bottom: 8px;
-    }
-
-    .no-posts-subtext {
-        font-size: 0.9rem;
-    }
-
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .post-card {
-        animation: slideIn 0.5s ease both;
-    }
-
-    .post-card:nth-child(1) {
-        animation-delay: 0.1s;
-    }
-
-    .post-card:nth-child(2) {
-        animation-delay: 0.2s;
-    }
-
-    .post-card:nth-child(3) {
-        animation-delay: 0.3s;
-    }
-
-    .post-card:nth-child(4) {
-        animation-delay: 0.4s;
-    }
-
-    .post-card:nth-child(5) {
-        animation-delay: 0.5s;
-    }
-
-    .message-banner {
-        background: #22c55e;
-        color: white;
-        padding: 14px 18px;
-        margin-bottom: 20px;
-        border-radius: 12px;
-        font-weight: 600;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-        opacity: 1;
-        transition: opacity 0.4s ease, transform 0.4s ease;
-    }
-
-    #message-container.hide {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-
-    .search-results {
-        margin-bottom: 24px;
-        padding: 20px;
-        border-radius: 18px;
-        background: rgba(241, 245, 249, 0.8);
-        border: 1px solid rgba(148, 163, 184, 0.25);
-    }
-
-    .search-results h2 {
-        margin: 0 0 12px;
-        font-size: 1rem;
-        color: var(--text);
-    }
-
-    .search-result {
-        padding: 14px 18px;
-        border-radius: 14px;
-        background: white;
-        border: 1px solid rgba(148, 163, 184, 0.15);
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-    }
-
-    .search-result:last-child {
-        margin-bottom: 0;
-    }
-
-    .search-result a {
-        color: var(--text);
-        font-weight: 600;
-        text-decoration: none;
-    }
+@keyframes fadeUp { from{opacity:0;transform:translateY(14px);} to{opacity:1;transform:translateY(0);} }
 </style>
 
-<div class="feed-page">
+<div class="feed-wrap">
 
     {% if messages %}
-    <div id="message-container">
+    <div id="msg-container">
         {% for message in messages %}
-        <div class="message-banner {{ message.tags }}">
-            {{ message }}
-        </div>
+        <div class="msg-banner {{ message.tags }}">{{ message }}</div>
         {% endfor %}
     </div>
     {% endif %}
 
-    <div class="feed-header">
-        <h1 class="feed-title">Community Feed</h1>
-        <a href="/create-post/" class="create-post-btn">
-            ✏️ Create Post
-        </a>
-    </div>
-
-    <div class="dashboard-panel" style="margin-bottom:20px;">
-    <div class="panel-header">
-        <h3 class="panel-title">🔔 Notifications</h3>
-    </div>
-
-    {% if notifications %}
-        {% for notification in notifications %}
-            <div class="notification-item">
-                <div>{{ notification.message }}</div>
-
-                <div class="notification-meta">
-                    {{ notification.created_at }}
+    <!-- STORIES -->
+    <div class="stories-bar">
+        <div class="story-item">
+            <a href="/create-post/" style="text-decoration:none;">
+                <div class="story-ring seen">
+                    <div class="story-ring-inner">
+                        <div class="story-avatar" style="background:var(--surface3);color:var(--violet2);font-size:1.5rem;">＋</div>
+                    </div>
                 </div>
-
-                <a href="/notification/read/{{ notification.id }}/"
-                   class="action-btn"
-                   style="margin-top:10px;display:inline-block;">
-                    Mark as Read
-                </a>
+            </a>
+            <span class="story-name">Your Story</span>
+        </div>
+        {% for post in posts %}
+        <div class="story-item">
+            <div class="story-ring">
+                <div class="story-ring-inner">
+                    <div class="story-avatar">{{ post.user.username|first|upper }}</div>
+                </div>
             </div>
-        {% endfor %}
-    {% else %}
-        <div class="no-items">
-            No new notifications.
-        </div>
-    {% endif %}
-</div>
-
-    {% if query %}
-<div class="search-results">
-    <h2>Search results for "{{ query }}"</h2>
-
-    <!-- User Results -->
-    {% if users %}
-        <h3>Users</h3>
-
-        {% for user in users %}
-        <div class="search-result">
-            <span>{{ user.username }}</span>
-            <a href="#">View</a>
+            <span class="story-name">{{ post.user.username }}</span>
         </div>
         {% endfor %}
-    {% endif %}
-
-    <!-- Post Results -->
-    {% if searched_posts %}
-        <h3>Matching Posts</h3>
-
-        {% for post in searched_posts %}
-        <div class="search-result">
-            <strong>{{ post.user.username }}</strong>
-            <br>
-            {{ post.caption }}
-        </div>
-        {% endfor %}
-    {% endif %}
-
-    {% if not users and not searched_posts %}
-        <div class="search-result">
-            No results found.
-        </div>
-    {% endif %}
-
-</div>
-{% endif %}
-
-    
-{% for post in posts %}
-    <div class="post-card">
-      <div class="post-header">
-    <div class="post-avatar">{{ post.user.username|first|upper }}</div>
-
-    <div class="post-user-info">
-    <div class="post-username">{{ post.user.username }}</div>
-
-   
-
-    <div style="font-size:12px;color:gray;">
-        Followers: {{ post.user.followers.count }}
     </div>
 
-    <div class="post-timestamp">2 hours ago</div>
-</div>
+    <!-- CAMPUS CHIPS -->
+    <div class="campus-chips">
+        <a href="/feed/" class="chip active">🏠 All</a>
+        <a href="/feed/?tag=announcements" class="chip">📢 Notices</a>
+        <a href="/feed/?tag=study" class="chip">📚 Study Groups</a>
+        <a href="/event/" class="chip">🎉 Events</a>
+        <a href="/feed/?tag=clubs" class="chip">🏆 Clubs</a>
+        <a href="/feed/?tag=lostfound" class="chip">🔍 Lost & Found</a>
+        <a href="/feed/?tag=memes" class="chip">😂 Memes</a>
+        <a href="/feed/?tag=placement" class="chip">💼 Placements</a>
+    </div>
 
-    {% if post.user != request.user %}
-    <a href="/follow/{{ post.user.id }}/" class="action-btn">
-        ➕ Follow
-    </a>
+    <!-- NOTIFICATIONS -->
+    <div class="notif-strip">
+        <div class="notif-strip-header" id="notif-header" onclick="toggleNotif()">
+            <span class="notif-strip-title">
+                🔔 Notifications
+                {% if notifications %}<span class="notif-count-badge">{{ notifications|length }}</span>{% endif %}
+            </span>
+            <span class="notif-toggle-icon" id="notif-icon">▼</span>
+        </div>
+        <div id="notif-body" style="display:none;">
+            <div class="notif-body">
+                {% if notifications %}
+                    {% for n in notifications %}
+                    <div class="notif-item">
+                        <div class="notif-dot"></div>
+                        <div class="notif-text">{{ n.message }}</div>
+                        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;">
+                            <span class="notif-time">{{ n.created_at|timesince }} ago</span>
+                            <a href="/notification/read/{{ n.id }}/" class="notif-mark">✓ Read</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="notif-empty">You're all caught up! 🎉</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- SEARCH RESULTS -->
+    {% if query %}
+    <div class="search-box">
+        <h2>🔍 Results for "{{ query }}"</h2>
+        {% if users %}
+            {% for u in users %}
+            <div class="s-result">
+                <a href="#">@{{ u.username }}</a>
+                <a href="/follow/{{ u.id }}/" class="btn-follow">+ Follow</a>
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% if searched_posts %}
+            {% for p in searched_posts %}
+            <div class="s-result">
+                <div>
+                    <div style="font-weight:700;font-size:0.82rem;color:var(--text);">{{ p.user.username }}</div>
+                    <div style="font-size:0.76rem;color:var(--muted2);margin-top:2px;">{{ p.caption|truncatechars:60 }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% if not users and not searched_posts %}
+        <p style="color:var(--muted);font-size:0.85rem;text-align:center;padding:8px 0;">No results found for "{{ query }}"</p>
+        {% endif %}
+    </div>
     {% endif %}
 
-    {% if post.user != request.user %}
-<a href="/chat/private/{{ post.user.id }}/" class="action-btn">
-    💬 Message
-</a>
-{% endif %}
-</div>
-        
+    <!-- POSTS -->
+    {% for post in posts %}
+    <div class="post-card">
 
-        <div class="post-content">
-            <div class="post-caption">{{ post.caption }}</div>
+        <div class="post-header">
+            <div class="post-avatar">{{ post.user.username|first|upper }}</div>
+            <div class="post-user-info">
+                <div class="post-username">{{ post.user.username }}</div>
+                <div class="post-meta-row">{{ post.created_at|timesince }} ago</div>
+            </div>
+            <div class="post-header-btns">
+                {% if post.user != request.user %}
+                <a href="/follow/{{ post.user.id }}/" class="btn-follow">+ Follow</a>
+                <a href="/chat/private/{{ post.user.id }}/" class="btn-msg">💬</a>
+                {% endif %}
+            </div>
+        </div>
 
-            {% if post.image %}
-            <img src="data:image/png;base64,{{ post.image }}" class="post-image" alt="Post image">
+        {% if post.caption %}
+        <p class="post-caption">{{ post.caption }}</p>
+        {% endif %}
+
+        {% if post.image %}
+        <img src="data:image/png;base64,{{ post.image }}" class="post-img" alt="Post image" loading="lazy">
+        {% endif %}
+
+        <div class="post-actions">
+            <button class="act-btn like-btn {% if post.id in user_likes %}liked{% endif %}" data-post-id="{{ post.id }}">
+                {% if post.id in user_likes %}❤️{% else %}🤍{% endif %}
+                <span id="likes-count-{{ post.id }}">{{ post.like_set.count }}</span>
+            </button>
+            <button class="act-btn comment-toggle" data-post-id="{{ post.id }}">
+                💬 <span id="comments-count-{{ post.id }}">{{ post.comment_set.count }}</span>
+            </button>
+            <button class="act-btn">↗️</button>
+            <span class="act-spacer"></span>
+            {% if post.user == request.user %}
+            <a href="/delete-post/{{ post.id }}/" class="act-btn" style="color:var(--red);" onclick="return confirm('Delete this post?')">🗑</a>
+            {% else %}
+            <a href="/report/{{ post.id }}/" class="act-btn">🚩</a>
             {% endif %}
         </div>
 
-        <div class="post-actions">
-            <a href="/like/{{ post.id }}/" class="action-btn">
-                ❤️ Like ({{ post.like_set.count }})
-            </a>
-            <button class="action-btn comment-toggle" data-post-id="{{ post.id }}">
-                💬 Comments ({{ post.comment_set.count }})
-            </button>
-            <a href="/report/{{ post.id }}/" class="action-btn">
-                🚩 Report
-            </a>
-
-            <a href="/block/{{ post.user.id }}/" class="action-btn">
-                🚫 Block
-            </a>
-
-             {% if post.user == request.user %}
-    <a href="/delete-post/{{ post.id }}/" class="action-btn">
-        🗑️ Delete
-    </a>
-    {% endif %}
-            <!-- <form method="POST" action="/delete-post/{{ post.id }}/">
-    {% csrf_token %}
-    <button type="submit" class="action-btn">
-        🗑️ Delete
-    </button>
-</form> -->
-        </div>
-
-        <div class="comments-section" id="comments-{{ post.id }}">
-            <div class="comments-title">Comments</div>
-
-            <form method="POST" action="/comment/{{ post.id }}/" class="comment-form">
+        <div class="comments-section" id="comments-{{ post.id }}" style="display:none;">
+            <form method="POST" action="/comment/{{ post.id }}/" class="comment-form" data-post-id="{{ post.id }}">
                 {% csrf_token %}
-                <input type="text" name="text" class="comment-input" placeholder="Write a comment..." required>
+                <div class="c-avatar">{{ request.user.username|first|upper }}</div>
+                <input type="text" name="text" class="comment-input" placeholder="Add a comment..." required>
                 <button type="submit" class="comment-submit">Post</button>
             </form>
+            <div class="comments-list" id="comments-list-{{ post.id }}">
+                {% for comment in post.comment_set.all %}
+                <div class="comment" id="comment-{{ comment.id }}">
+                    <div class="c-avatar">{{ comment.user.username|first|upper }}</div>
+                    <div class="comment-content">
+                        <div class="comment-username">{{ comment.user.username }}</div>
+                        <div class="comment-text">{{ comment.text }}</div>
+                    </div>
+                    {% if comment.user == request.user %}
+                    <button class="del-comment-btn" data-comment-id="{{ comment.id }}">🗑</button>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
 
-        
     </div>
     {% empty %}
-    <div class="no-posts">
-        <div class="no-posts-icon">📭</div>
-        <div class="no-posts-text">No posts yet</div>
-        <div class="no-posts-subtext">Be the first to share something with the community!</div>
+    <div class="empty-state">
+        <div class="empty-icon">🎓</div>
+        <div class="empty-title">Your campus feed is quiet...</div>
+        <div class="empty-sub">Follow classmates or share your first post!</div>
+        <a href="/create-post/" class="btn btn-primary" style="width:auto;display:inline-flex;padding:12px 24px;">✦ Create First Post</a>
     </div>
     {% endfor %}
+
+    <!-- PAGINATION -->
+    {% if posts.paginator.num_pages > 1 %}
+    <div class="pagination">
+        {% if posts.has_previous %}
+        <a href="?page={{ posts.previous_page_number }}" class="page-btn">← Prev</a>
+        {% endif %}
+        <span class="page-info">{{ posts.number }} / {{ posts.paginator.num_pages }}</span>
+        {% if posts.has_next %}
+        <a href="?page={{ posts.next_page_number }}" class="page-btn">Next →</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const commentButtons = document.querySelectorAll('.comment-toggle');
-        commentButtons.forEach(button => {
-            button.addEventListener('click', function () {
-                const postId = this.getAttribute('data-post-id');
-                scrollToComments(postId);
-            });
+function toggleNotif() {
+    const body = document.getElementById('notif-body');
+    const icon = document.getElementById('notif-icon');
+    const header = document.getElementById('notif-header');
+    const open = body.style.display === 'none';
+    body.style.display = open ? 'block' : 'none';
+    icon.textContent = open ? '▲' : '▼';
+    icon.classList.toggle('open', open);
+    header.classList.toggle('open', open);
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Comment section toggle
+    document.querySelectorAll('.comment-toggle').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const id = this.getAttribute('data-post-id');
+            const sec = document.getElementById('comments-' + id);
+            sec.style.display = sec.style.display === 'none' ? 'block' : 'none';
         });
     });
 
-    function scrollToComments(postId) {
-        const commentsSection = document.getElementById(`comments-${postId}`);
-        commentsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
+    // Like AJAX
+    document.querySelectorAll('.like-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const postId = this.getAttribute('data-post-id');
+            fetch('/like/' + postId + '/', {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.liked) { this.classList.add('liked'); this.childNodes[0].textContent = '❤️'; }
+                else            { this.classList.remove('liked'); this.childNodes[0].textContent = '🤍'; }
+                document.getElementById('likes-count-' + postId).textContent = data.likes_count;
+            })
+            .catch(err => console.error('Like error:', err));
+        });
+    });
 
-    const messageContainer = document.getElementById('message-container');
-    if (messageContainer) {
-        window.setTimeout(() => {
-            messageContainer.classList.add('hide');
-            window.setTimeout(() => {
-                messageContainer.remove();
-            }, 450);
-        }, 3200);
-    }
+    // Comment AJAX
+    document.querySelectorAll('.comment-form').forEach(form => {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const postId = this.getAttribute('data-post-id');
+            const input = this.querySelector('.comment-input');
+            if (!input.value.trim()) return;
+            const fd = new FormData(this);
+            fd.append('ajax', 'true');
+            fetch(this.action, {
+                method: 'POST', body: fd,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    input.value = '';
+                    const list = document.getElementById('comments-list-' + postId);
+                    list.insertAdjacentHTML('beforeend', `
+                        <div class="comment" id="comment-${data.comment.id}" style="animation:fadeUp 0.3s ease both;">
+                            <div class="c-avatar">${data.comment.avatar}</div>
+                            <div class="comment-content">
+                                <div class="comment-username">${data.comment.username}</div>
+                                <div class="comment-text">${data.comment.text}</div>
+                            </div>
+                            <button class="del-comment-btn" data-comment-id="${data.comment.id}">🗑</button>
+                        </div>`);
+                    document.getElementById('comments-count-' + postId).textContent = data.comments_count;
+                }
+            })
+            .catch(err => console.error('Comment error:', err));
+        });
+    });
+
+    // Delete comment AJAX
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('.del-comment-btn');
+        if (!btn) return;
+        const cid = btn.getAttribute('data-comment-id');
+        const div = document.getElementById('comment-' + cid);
+        fetch('/delete-comment/' + cid + '/', {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                div.style.transition = 'all 0.3s ease';
+                div.style.opacity = '0'; div.style.transform = 'translateY(-6px)';
+                setTimeout(() => div.remove(), 300);
+                const list = div.closest('.comments-list');
+                if (list) {
+                    const pid = list.id.replace('comments-list-', '');
+                    const span = document.getElementById('comments-count-' + pid);
+                    if (span) span.textContent = data.comments_count;
+                }
+            }
+        })
+        .catch(err => console.error('Delete comment error:', err));
+    });
+
+    // Auto-hide flash message
+    const msg = document.getElementById('msg-container');
+    if (msg) setTimeout(() => {
+        msg.querySelectorAll('.msg-banner').forEach(b => b.classList.add('hide'));
+        setTimeout(() => msg.remove(), 450);
+    }, 3000);
+});
 </script>
-
-<div style="text-align:center;margin-top:20px;">
-
-    {% if posts.has_previous %}
-        <a href="?page={{ posts.previous_page_number }}">
-            Previous
-        </a>
-    {% endif %}
-
-    Page {{ posts.number }} of {{ posts.paginator.num_pages }}
-
-    {% if posts.has_next %}
-        <a href="?page={{ posts.next_page_number }}">
-            Next
-        </a>
-    {% endif %}
-
-</div>
 
 {% endblock %}

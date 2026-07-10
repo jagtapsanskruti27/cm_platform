@@ -6,6 +6,8 @@ from . import views
 urlpatterns = [
     path('', home),
     path('register/', register_view),
+    path('admin-register/', views.admin_register_view, name='admin_register'),
+    path('admin-approve/<str:token>/', views.admin_approve_view, name='admin_approve'),
     path('login/', login_view, name='login'),
     path("admin-login/", views.admin_login_view, name="admin_login"),
     path('profile/', profile_view),

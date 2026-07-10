@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from .models import Post, Like, Comment, Follow
 from event.models import Event, Notification
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator
 
@@ -45,6 +45,8 @@ def feed(request):
             caption__icontains=query
         )
 
+    user_likes = Like.objects.filter(user=request.user).values_list('post_id', flat=True)
+
     return render(request, 'feed.html', {
         'posts': posts,
         'events': events,
@@ -52,6 +54,7 @@ def feed(request):
         'users': users,
         'searched_posts': searched_posts,
         'query': query,
+        'user_likes': user_likes,
     })
 
 
@@ -88,11 +91,22 @@ def like_post(request, id):
         post=post
     )
 
-    if created and post.user != request.user:
-        Notification.objects.create(
-            user=post.user,
-            message=f"{request.user.username} liked your post."
-        )
+    if not created:
+        like.delete()
+        liked = False
+    else:
+        liked = True
+        if post.user != request.user:
+            Notification.objects.create(
+                user=post.user,
+                message=f"{request.user.username} liked your post."
+            )
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('ajax') == 'true':
+        return JsonResponse({
+            'liked': liked,
+            'likes_count': post.like_set.count()
+        })
 
     return redirect('/feed/')
 
@@ -103,7 +117,7 @@ def comment_post(request, id):
         post = Post.objects.get(id=id)
         text = request.POST.get('text')
 
-        Comment.objects.create(
+        comment = Comment.objects.create(
             user=request.user,
             post=post,
             text=text
@@ -115,17 +129,39 @@ def comment_post(request, id):
                 message=f"{request.user.username} commented on your post."
             )
 
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('ajax') == 'true':
+            return JsonResponse({
+                'success': True,
+                'comment': {
+                    'id': comment.id,
+                    'username': comment.user.username,
+                    'text': comment.text,
+                    'created_at': comment.created_at.strftime('%b. %d, %Y, %I:%M %p'),
+                    'avatar': comment.user.username[0].upper()
+                },
+                'comments_count': post.comment_set.count()
+            })
+
     return redirect('/feed/')
 
 
 @login_required
 def delete_comment(request, id):
     comment = Comment.objects.get(id=id)
+    post_id = comment.post.id
 
     if comment.user != request.user:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': 'Permission Denied'}, status=403)
         return HttpResponse("Permission Denied")
 
     comment.delete()
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('ajax') == 'true':
+        return JsonResponse({
+            'success': True,
+            'comments_count': Comment.objects.filter(post_id=post_id).count()
+        })
 
     return redirect('/feed/')
 

@@ -1,285 +1,137 @@
 {% extends 'index.html' %}
-
 {% block content %}
-
 <style>
-    .auth-layout {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        min-height: calc(100vh - 70px);
-    }
+.auth-layout {
+    display: grid; grid-template-columns: 1fr 1fr;
+    min-height: calc(100vh - 60px);
+}
+@media (max-width: 680px) {
+    .auth-layout { grid-template-columns: 1fr; }
+    .auth-panel { display: none; }
+}
+.auth-form-side {
+    padding: 60px 40px; display: flex; flex-direction: column; justify-content: center;
+    background: var(--bg); border-right: 1px solid var(--border);
+}
+@media (max-width: 680px) { .auth-form-side { padding: 40px 24px; border-right: none; } }
+.auth-brand { display: flex; align-items: center; gap: 8px; margin-bottom: 36px; }
+.auth-brand-icon { width: 32px; height: 32px; border-radius: 10px; background: var(--grad-main); display: flex; align-items: center; justify-content: center; font-size: 1rem; box-shadow: 0 0 14px rgba(124,58,237,0.35); }
+.auth-brand-name { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; background: var(--grad-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.auth-heading { font-family: 'Syne', sans-serif; font-size: 1.9rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 6px; }
+.auth-sub { color: var(--muted2); font-size: 0.875rem; margin-bottom: 30px; }
+.auth-sub a { color: var(--violet2); text-decoration: none; font-weight: 600; }
+.auth-sub a:hover { text-decoration: underline; }
+.forgot-row { display: flex; justify-content: flex-end; margin-top: 4px; }
+.forgot-link { font-size: 0.78rem; color: var(--muted); text-decoration: none; }
+.forgot-link:hover { color: var(--violet2); }
 
-    /* ── FORM SIDE (left on login) ── */
-    .auth-form-side {
-        padding: 80px 70px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        background: var(--bg);
-        border-right: 1px solid var(--border);
-    }
+/* Right panel */
+.auth-panel {
+    background: linear-gradient(145deg, #0d0e1e 0%, #10111f 100%);
+    padding: 60px 50px; display: flex; flex-direction: column; justify-content: center;
+    position: relative; overflow: hidden;
+}
+.auth-panel::before {
+    content: ''; position: absolute; top: -120px; right: -80px;
+    width: 400px; height: 400px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 65%); pointer-events: none;
+}
+.auth-panel::after {
+    content: ''; position: absolute; bottom: -80px; left: -60px;
+    width: 320px; height: 320px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(236,72,153,0.09) 0%, transparent 65%); pointer-events: none;
+}
+.panel-headline { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 18px; }
+.panel-headline span { background: var(--grad-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.panel-sub { color: var(--muted2); font-size: 0.9rem; line-height: 1.7; max-width: 300px; margin-bottom: 40px; }
+.live-badge { display: flex; align-items: center; gap: 7px; font-size: 0.72rem; color: var(--emerald2); font-weight: 700; letter-spacing: 0.06em; margin-bottom: 14px; }
+.live-dot-anim { width: 7px; height: 7px; border-radius: 50%; background: var(--emerald); animation: pulse 1.5s ease infinite; }
+.activity-feed { display: flex; flex-direction: column; gap: 10px; max-width: 340px; }
+.act-card { display: flex; align-items: flex-start; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; transition: transform 0.2s; }
+.act-card:hover { transform: translateX(4px); }
+.act-av { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex-shrink: 0; }
+.act-txt { font-size: 0.8rem; line-height: 1.5; color: var(--text2); }
+.act-txt strong { color: var(--text); font-weight: 600; }
+.act-t { font-size: 0.68rem; color: var(--muted); margin-top: 3px; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.5;transform:scale(0.8);} }
 
-    .auth-heading {
-        font-family: 'Syne', sans-serif;
-        font-size: 2rem;
-        font-weight: 700;
-        letter-spacing: -0.02em;
-        margin-bottom: 8px;
-    }
-
-    .auth-sub {
-        color: var(--muted);
-        font-size: 0.9rem;
-        margin-bottom: 36px;
-    }
-
-    .auth-sub a {
-        color: var(--accent);
-        text-decoration: none;
-        font-weight: 500;
-    }
-
-    .auth-sub a:hover { text-decoration: underline; }
-
-    .forgot-link {
-        display: flex;
-        justify-content: flex-end;
-        margin-top: 6px;
-    }
-
-    .forgot-link a {
-        font-size: 0.78rem;
-        color: var(--muted);
-        text-decoration: none;
-    }
-
-    .forgot-link a:hover { color: var(--accent); }
-
-    /* ── RIGHT PANEL ── */
-    .auth-panel {
-        background: linear-gradient(145deg, #0d1321 0%, #111827 100%);
-        padding: 80px 60px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: flex-start;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .auth-panel::before {
-        content: '';
-        position: absolute;
-        top: -100px; right: -100px;
-        width: 500px; height: 500px;
-        background: radial-gradient(circle, rgba(162,89,255,0.1) 0%, transparent 60%);
-        pointer-events: none;
-    }
-
-    .auth-panel::after {
-        content: '';
-        position: absolute;
-        bottom: -60px; left: -60px;
-        width: 350px; height: 350px;
-        background: radial-gradient(circle, rgba(79,140,255,0.08) 0%, transparent 60%);
-        pointer-events: none;
-    }
-
-    .panel-headline {
-        font-family: 'Syne', sans-serif;
-        font-size: 2.4rem;
-        font-weight: 800;
-        line-height: 1.1;
-        letter-spacing: -0.03em;
-        margin-bottom: 20px;
-    }
-
-    .panel-headline span {
-        background: linear-gradient(135deg, var(--accent), var(--accent2));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .panel-sub {
-        color: var(--muted);
-        font-size: 0.95rem;
-        line-height: 1.7;
-        max-width: 320px;
-        margin-bottom: 50px;
-    }
-
-    /* Activity feed preview */
-    .activity-feed {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        width: 100%;
-        max-width: 360px;
-    }
-
-    .activity-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 14px 16px;
-        transition: transform 0.2s;
-    }
-
-    .activity-item:hover { transform: translateX(4px); }
-
-    .a-avatar {
-        width: 34px; height: 34px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.75rem;
-        font-weight: 700;
-        flex-shrink: 0;
-        margin-top: 1px;
-    }
-
-    .a-content { flex: 1; }
-
-    .a-text {
-        font-size: 0.83rem;
-        line-height: 1.5;
-        margin-bottom: 4px;
-    }
-
-    .a-text strong { color: var(--text); font-weight: 600; }
-    .a-text span   { color: var(--muted); }
-
-    .a-time {
-        font-size: 0.72rem;
-        color: var(--muted);
-    }
-
-    .live-dot {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 0.75rem;
-        color: var(--success);
-        font-weight: 600;
-        margin-bottom: 16px;
-        letter-spacing: 0.04em;
-    }
-
-    .live-dot::before {
-        content: '';
-        width: 7px; height: 7px;
-        border-radius: 50%;
-        background: var(--success);
-        animation: pulse 1.5s ease infinite;
-    }
+/* Social buttons */
+.social-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 </style>
 
 <div class="auth-layout">
-
     <!-- FORM SIDE -->
     <div class="auth-form-side">
-        <div style="margin-bottom:40px;" class="anim-1">
-            <div style="display:flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;margin-bottom:0;">
-                <span style="width:9px;height:9px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 0 10px var(--accent);display:block;"></span>
-                Nexus
-            </div>
+        <div class="auth-brand anim-1">
+            <div class="auth-brand-icon">🎓</div>
+            <span class="auth-brand-name">CampusVibe</span>
         </div>
 
-        <h2 class="auth-heading anim-2">User Login</h2>
-        <p>
-
-Administrator?
-
-<a href="{% url 'admin_login' %}">
-Login here →
-</a>
-
-</p>
-        <p class="auth-sub anim-2">Don't have an account? <a href="/register/">Sign up free →</a></p>
+        <h2 class="auth-heading anim-2">Welcome back 👋</h2>
+        <p class="auth-sub anim-2">
+            New to campus? <a href="/register/">Sign up free →</a><br>
+            Admin? <a href="{% url 'admin_login' %}">Admin login →</a>
+        </p>
 
         <form method="POST" class="anim-3">
             {% csrf_token %}
-
             <div class="form-group">
                 <label>Username</label>
                 <input type="text" name="username" placeholder="your_handle" autocomplete="username">
             </div>
-
             <div class="form-group">
                 <label>Password</label>
                 <input type="password" name="password" placeholder="••••••••" autocomplete="current-password">
-                <div class="forgot-link"><a href="{% url 'password_reset' %}">
-    Forgot Password?
-</a></div>
+                <div class="forgot-row"><a href="{% url 'password_reset' %}" class="forgot-link">Forgot password?</a></div>
             </div>
-
-            {% if error %}
-            <div class="alert alert-error anim-1">
-                <span>⚠</span> {{ error }}
-            </div>
-            {% endif %}
-
-            <button type="submit" class="btn btn-primary" style="margin-top:8px;">
-                Sign in →
-            </button>
+            {% if error %}<div class="alert alert-error"><span>⚠</span> {{ error }}</div>{% endif %}
+            <button type="submit" class="btn btn-primary" style="margin-top:8px;">Sign in to Campus →</button>
         </form>
 
-        <div class="divider anim-4">or continue with</div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" class="anim-4">
-            <button class="btn btn-ghost" style="font-size:0.85rem;">
-                <span>🔑</span> Google
-            </button>
-            <button class="btn btn-ghost" style="font-size:0.85rem;">
-                <span>🐙</span> GitHub
-            </button>
+        <div class="divider anim-4">or</div>
+        <div class="social-grid anim-4">
+            <button class="btn btn-ghost" style="font-size:0.82rem;">🔑 Google</button>
+            <button class="btn btn-ghost" style="font-size:0.82rem;">🏢 College SSO</button>
         </div>
     </div>
 
     <!-- RIGHT PANEL -->
     <div class="auth-panel anim-1">
-        <h2 class="panel-headline">Your community<br>is <span>waiting</span> for<br>you.</h2>
-        <p class="panel-sub">Hundreds of discussions are happening right now. Sign in to join the conversation.</p>
+        <h2 class="panel-headline">Your campus<br>is <span>buzzing</span><br>right now.</h2>
+        <p class="panel-sub">Hundreds of students are posting, chatting, and connecting. Join them.</p>
 
-        <div class="live-dot">LIVE ACTIVITY</div>
+        <div class="live-badge"><span class="live-dot-anim"></span>LIVE CAMPUS ACTIVITY</div>
 
         <div class="activity-feed">
-            <div class="activity-item">
-                <div class="a-avatar" style="background:rgba(79,140,255,0.2);color:var(--accent);">A</div>
-                <div class="a-content">
-                    <div class="a-text"><strong>Alex C.</strong> <span>started a new thread in</span> #design</div>
-                    <div class="a-time">2 minutes ago</div>
+            <div class="act-card">
+                <div class="act-av" style="background:rgba(124,58,237,0.2);color:var(--violet2);">A</div>
+                <div>
+                    <div class="act-txt"><strong>Arjun M.</strong> posted in <span>#placements — "Got into Google! 🎉"</span></div>
+                    <div class="act-t">2 min ago</div>
                 </div>
             </div>
-            <div class="activity-item">
-                <div class="a-avatar" style="background:rgba(162,89,255,0.2);color:var(--accent2);">P</div>
-                <div class="a-content">
-                    <div class="a-text"><strong>Priya N.</strong> <span>replied to your post on</span> #startups</div>
-                    <div class="a-time">8 minutes ago</div>
+            <div class="act-card">
+                <div class="act-av" style="background:rgba(236,72,153,0.2);color:var(--pink2);">P</div>
+                <div>
+                    <div class="act-txt"><strong>Priya N.</strong> <span>is organising a study group for GATE 2027</span></div>
+                    <div class="act-t">8 min ago</div>
                 </div>
             </div>
-            <div class="activity-item">
-                <div class="a-avatar" style="background:rgba(245,200,66,0.2);color:var(--gold);">J</div>
-                <div class="a-content">
-                    <div class="a-text"><strong>James K.</strong> <span>liked your comment in</span> #tech</div>
-                    <div class="a-time">15 minutes ago</div>
+            <div class="act-card">
+                <div class="act-av" style="background:rgba(6,182,212,0.2);color:var(--cyan2);">R</div>
+                <div>
+                    <div class="act-txt"><strong>Rohan K.</strong> <span>shared internship tips in #career</span></div>
+                    <div class="act-t">15 min ago</div>
                 </div>
             </div>
-            <div class="activity-item">
-                <div class="a-avatar" style="background:rgba(61,220,172,0.2);color:var(--success);">M</div>
-                <div class="a-content">
-                    <div class="a-text"><strong>Maya O.</strong> <span>sent you a direct message</span></div>
-                    <div class="a-time">32 minutes ago</div>
+            <div class="act-card">
+                <div class="act-av" style="background:rgba(245,158,11,0.2);color:var(--gold2);">S</div>
+                <div>
+                    <div class="act-txt"><strong>Sneha V.</strong> <span>created event: Annual Hackathon 2026</span></div>
+                    <div class="act-t">30 min ago</div>
                 </div>
             </div>
         </div>
     </div>
-
 </div>
-
 {% endblock %}
