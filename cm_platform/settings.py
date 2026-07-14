@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'event',
     'advanced',
     'analytics.dashboard',
+    'story',
   
 ]
 ASGI_APPLICATION = 'cm_platform.asgi.application'

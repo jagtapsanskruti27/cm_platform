@@ -22,10 +22,12 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("", include("app.urls")),
     path("", include("post.urls")),
+    path("", include("story.urls")),
     path("", include("chat.urls")),
     path("", include("event.urls")),
     path("", include("advanced.urls")),
     path("", include("analytics.dashboard.urls")),
+    
 ]    
 
 from django.conf import settings

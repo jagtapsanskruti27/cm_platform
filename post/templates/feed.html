@@ -128,28 +128,92 @@
     {% endif %}
 
     <!-- STORIES -->
-    <div class="stories-bar">
-        <div class="story-item">
-            <a href="/create-post/" style="text-decoration:none;">
-                <div class="story-ring seen">
-                    <div class="story-ring-inner">
-                        <div class="story-avatar" style="background:var(--surface3);color:var(--violet2);font-size:1.5rem;">＋</div>
-                    </div>
-                </div>
-            </a>
-            <span class="story-name">Your Story</span>
-        </div>
-        {% for post in posts %}
-        <div class="story-item">
-            <div class="story-ring">
+    <!-- STORIES -->
+
+<div class="stories-bar">
+
+    <!-- Upload Story -->
+
+    <div class="story-item">
+
+        <a href="{% url 'create_story' %}" style="text-decoration:none;">
+
+            <div class="story-ring seen">
+
                 <div class="story-ring-inner">
-                    <div class="story-avatar">{{ post.user.username|first|upper }}</div>
+
+                    <div class="story-avatar"
+                    style="
+                    background:var(--surface3);
+                    color:var(--violet2);
+                    font-size:28px;">
+
+                        +
+
+                    </div>
+
                 </div>
+
             </div>
-            <span class="story-name">{{ post.user.username }}</span>
-        </div>
-        {% endfor %}
+
+        </a>
+
+        <span class="story-name">
+
+            Your Story
+
+        </span>
+
     </div>
+
+
+    {% for story in stories %}
+
+    <div class="story-item">
+
+        <a href="{% url 'view_story' story.id %}">
+
+            <div class="story-ring">
+
+                <div class="story-ring-inner">
+
+                    <img
+                    src="data:image/png;base64,{{ story.image }}"
+                    style="
+                    width:100%;
+                    height:100%;
+                    border-radius:50%;
+                    object-fit:cover;">
+
+                </div>
+
+            </div>
+
+        </a>
+
+        <span class="story-name">
+
+            {{ story.user.username }}
+
+        </span>
+
+    </div>
+
+    {% empty %}
+
+    <div class="story-item">
+
+        <span class="story-name">
+
+            No Stories
+
+        </span>
+
+    </div>
+
+    {% endfor %}
+
+</div>
 
     <!-- CAMPUS CHIPS -->
     <div class="campus-chips">

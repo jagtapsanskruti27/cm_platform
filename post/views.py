@@ -1,5 +1,5 @@
 import base64
-
+from story.models import Story
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -8,6 +8,8 @@ from event.models import Event, Notification
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator
+from django.utils import timezone
+from datetime import timedelta
 
 @login_required
 def feed(request):
@@ -23,6 +25,9 @@ def feed(request):
     page_number = request.GET.get('page')
 
     posts = paginator.get_page(page_number)
+    stories = Story.objects.filter(
+    created_at__gte=timezone.now() - timedelta(hours=24)
+).order_by("-created_at")
 
     events = Event.objects.all().order_by('start_datetime')[:3]
 
@@ -48,14 +53,15 @@ def feed(request):
     user_likes = Like.objects.filter(user=request.user).values_list('post_id', flat=True)
 
     return render(request, 'feed.html', {
-        'posts': posts,
-        'events': events,
-        'notifications': notifications,
-        'users': users,
-        'searched_posts': searched_posts,
-        'query': query,
-        'user_likes': user_likes,
-    })
+    'posts': posts,
+    'stories': stories,
+    'events': events,
+    'notifications': notifications,
+    'users': users,
+    'searched_posts': searched_posts,
+    'query': query,
+    'user_likes': user_likes,
+})
 
 
 @login_required

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>Create Story</title>
+
+    <style>
+
+        body{
+            background:#0d0f1a;
+            font-family:Arial;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:100vh;
+            color:white;
+        }
+
+        .box{
+
+            width:400px;
+            background:#171a2b;
+            padding:30px;
+            border-radius:15px;
+            text-align:center;
+
+        }
+
+        h2{
+            margin-bottom:25px;
+        }
+
+        input[type=file]{
+
+            width:100%;
+            margin:20px 0;
+            color:white;
+
+        }
+
+        button{
+
+            width:100%;
+            padding:12px;
+            background:#8b5cf6;
+            color:white;
+            border:none;
+            border-radius:8px;
+            cursor:pointer;
+            font-size:16px;
+
+        }
+
+        button:hover{
+
+            background:#6d28d9;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>Create Story</h2>
+
+<form method="POST" enctype="multipart/form-data">
+
+{% csrf_token %}
+
+<input
+type="file"
+name="image"
+accept="image/*"
+required>
+
+<button type="submit">
+
+Upload Story
+
+</button>
+
+</form>
+
+</div>
+
+</body>
+</html>
